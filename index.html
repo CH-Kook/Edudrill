@@ -11,36 +11,15 @@
     <!-- Google Fonts: Noto Sans KR -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-        }
-        /* Card Flip Style */
-        .perspective-1000 {
-            perspective: 1000px;
-        }
-        .preserve-3d {
-            transform-style: preserve-3d;
-        }
-        .backface-hidden {
-            backface-visibility: hidden;
-        }
-        .rotate-y-180 {
-            transform: rotateY(180deg);
-        }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .perspective-1000 { perspective: 1000px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
@@ -62,7 +41,7 @@
                 <button onclick="navigate('home')" class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition flex items-center gap-1">
                     <i class="fa-solid fa-house"></i> <span class="hidden sm:inline">학습실</span>
                 </button>
-                <button onclick="navigate('teacher')" class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition bg-indigo-800 flex items-center gap-1">
+                <button onclick="openTeacherAccessModal()" class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition bg-indigo-800 flex items-center gap-1">
                     <i class="fa-solid fa-user-gear"></i> <span>교사용 관리자</span>
                 </button>
             </nav>
@@ -74,28 +53,146 @@
         
         <!-- ================= HOME / SELECT UNIT VIEW ================= -->
         <section id="view-home" class="view-section space-y-6">
-            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-3xl p-6 md:p-8 shadow-lg relative overflow-hidden">
-                <div class="relative z-10 max-w-lg">
-                    <span class="bg-amber-400 text-slate-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">오늘의 도전</span>
-                    <h2 class="text-2xl md:text-3xl font-extrabold mt-3 leading-tight">지루한 영어 공부는 이제 끝!<br>단계별 드릴로 마스터하세요.</h2>
-                    <p class="text-indigo-100 mt-2 text-sm md:text-base">카드 학습부터 타이핑, 빈칸 채우기, 문장 조합, 영작문까지 5단계를 거치면 단어가 저절로 외워집니다.</p>
+            <!-- Speed Quiz Banner -->
+            <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-3xl p-6 md:p-8 shadow-lg relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="relative z-10 max-w-xl">
+                    <span class="bg-white text-orange-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">스피드 게임 모드</span>
+                    <h2 class="text-2xl md:text-3xl font-extrabold mt-2 leading-tight">💥 30초 서바이벌 스피드 퀴즈!</h2>
+                    <p class="text-amber-50 mt-2 text-sm">원하는 단원을 조합해 박진감 넘치는 퀴즈에 도전하세요! 맞추면 +5초, 틀리면 -5초! 귀로 듣고 머리로 맞추는 스피드 서바이벌!</p>
                 </div>
-                <div class="absolute right-4 bottom-0 opacity-10 text-[120px] pointer-events-none hidden md:block">
-                    <i class="fa-solid fa-book-bookmark"></i>
+                <button onclick="openSpeedQuizSetup()" class="relative z-10 px-6 py-3 bg-white text-orange-600 font-black rounded-2xl shadow-md hover:bg-amber-50 transition transform active:scale-95 flex items-center gap-2 text-base shrink-0 whitespace-nowrap">
+                    <i class="fa-solid fa-bolt-lightning animate-pulse"></i> 퀴즈 시작하기
+                </button>
+                <div class="absolute right-4 bottom-0 opacity-10 text-[140px] pointer-events-none hidden lg:block">
+                    <i class="fa-solid fa-stopwatch"></i>
                 </div>
             </div>
 
-            <div>
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-indigo-500"></i> 학습 단원 선택하기
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-book text-indigo-500"></i> 단원별 정밀 드릴 코스
                     </h3>
-                    <span id="unit-count-badge" class="text-xs bg-slate-200 text-slate-700 px-3 py-1 rounded-full font-semibold">총 0개 단원</span>
+                    <span id="unit-count-badge" class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-semibold">총 0개 단원</span>
                 </div>
                 
                 <!-- Unit Grid Container -->
                 <div id="unit-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Dynamic units injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SPEED QUIZ SETUP MODAL ================= -->
+        <div id="quiz-setup-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-xl space-y-5">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-extrabold text-slate-900 text-xl flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-orange-500"></i> 퀴즈 범위 설정하기
+                    </h3>
+                    <button onclick="closeSpeedQuizSetup()" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <p class="text-sm text-slate-500">출제 영역에 포함할 단원을 **모두 체크**해 주세요. 여러 단원을 선택하면 문제가 골고루 섞여서 출제됩니다.</p>
+                
+                <!-- Checkboxes wrapper -->
+                <div id="quiz-unit-checkboxes" class="space-y-2 max-h-48 overflow-y-auto p-1">
+                    <!-- Dynamic unit checkboxes -->
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="startSpeedQuizGame()" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-2xl hover:from-amber-600 hover:to-orange-600 transition shadow-md shadow-orange-100 flex items-center justify-center gap-2 text-base">
+                        <i class="fa-solid fa-play"></i> 카운트다운 시작!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SPEED QUIZ PLAYING FIELD ================= -->
+        <section id="view-quiz-play" class="view-section hidden max-w-2xl mx-auto space-y-4">
+            <div class="flex justify-between items-center bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex items-center space-x-4">
+                    <div class="text-center">
+                        <div class="text-xs text-slate-400 font-bold">현재 점수</div>
+                        <div id="quiz-score-text" class="text-2xl font-black text-indigo-600">0</div>
+                    </div>
+                </div>
+                <!-- Timer Gauge -->
+                <div class="flex items-center space-x-3 w-1/2 justify-end">
+                    <i class="fa-solid fa-clock text-orange-500 text-xl animate-spin" style="animation-duration: 3s;"></i>
+                    <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden border border-slate-200 relative">
+                        <div id="quiz-timer-bar" class="bg-gradient-to-r from-orange-500 to-red-500 h-full transition-all duration-200" style="width: 100%"></div>
+                        <span id="quiz-timer-text" class="absolute inset-0 flex items-center justify-center text-[10px] font-extrabold text-slate-700">30초</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Question Box -->
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-slate-100 min-h-[360px] flex flex-col justify-between relative overflow-hidden">
+                <!-- Watermark background for Type 4 Listening -->
+                <div id="quiz-listening-watermark" class="absolute inset-0 bg-slate-50 flex flex-col items-center justify-center text-slate-300 hidden">
+                    <i class="fa-solid fa-volume-high text-7xl animate-bounce mb-3 text-indigo-200"></i>
+                    <p class="text-sm text-slate-400 font-bold">귀를 기울이고 원어민 소리를 들으세요!</p>
+                    <button onclick="speakQuizText()" class="mt-4 px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-200 transition">
+                        <i class="fa-solid fa-arrows-rotate"></i> 다시 듣기
+                    </button>
+                </div>
+
+                <!-- Main Content Panel -->
+                <div class="text-center space-y-4 my-auto relative z-10">
+                    <div id="quiz-type-badge" class="inline-block px-3 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-500">
+                        유형 1: 의미 맞추기
+                    </div>
+                    <h3 id="quiz-question-display" class="text-2xl md:text-3xl font-black text-slate-900 leading-relaxed tracking-wide px-2">
+                        Question Text
+                    </h3>
+                </div>
+
+                <!-- 4 Choices Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6 relative z-10">
+                    <button onclick="submitQuizAnswer(0)" id="quiz-choice-0" class="quiz-choice-btn p-4 bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-400 font-bold text-left rounded-2xl text-slate-700 transition flex items-center justify-between group active:scale-95">
+                        <span class="choice-text">Option 1</span> <i class="fa-regular fa-circle-right text-slate-300 group-hover:text-indigo-500 transition"></i>
+                    </button>
+                    <button onclick="submitQuizAnswer(1)" id="quiz-choice-1" class="quiz-choice-btn p-4 bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-400 font-bold text-left rounded-2xl text-slate-700 transition flex items-center justify-between group active:scale-95">
+                        <span class="choice-text">Option 2</span> <i class="fa-regular fa-circle-right text-slate-300 group-hover:text-indigo-500 transition"></i>
+                    </button>
+                    <button onclick="submitQuizAnswer(2)" id="quiz-choice-2" class="quiz-choice-btn p-4 bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-400 font-bold text-left rounded-2xl text-slate-700 transition flex items-center justify-between group active:scale-95">
+                        <span class="choice-text">Option 3</span> <i class="fa-regular fa-circle-right text-slate-300 group-hover:text-indigo-500 transition"></i>
+                    </button>
+                    <button onclick="submitQuizAnswer(3)" id="quiz-choice-3" class="quiz-choice-btn p-4 bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-400 font-bold text-left rounded-2xl text-slate-700 transition flex items-center justify-between group active:scale-95">
+                        <span class="choice-text">Option 4</span> <i class="fa-regular fa-circle-right text-slate-300 group-hover:text-indigo-500 transition"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button onclick="terminateSpeedQuiz()" class="text-xs text-rose-500 font-bold hover:underline">
+                    <i class="fa-solid fa-circle-stop"></i> 게임 기권하고 나가기
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= SPEED QUIZ RESULT VIEW ================= -->
+        <section id="view-quiz-result" class="view-section hidden max-w-md mx-auto">
+            <div class="bg-white rounded-3xl p-8 shadow-xl border border-slate-100 text-center space-y-6">
+                <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-indigo-50 text-indigo-600 text-5xl animate-bounce">
+                    <i class="fa-solid fa-stopwatch-20"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900">타임아웃! 게임 종료</h2>
+                    <p class="text-sm text-slate-500 mt-1">서바이벌 퀴즈가 마무리되었습니다.</p>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                    <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">최종 획득 스코어</div>
+                    <div id="quiz-final-score" class="text-5xl font-black text-orange-500 mt-1">0점</div>
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <button onclick="openSpeedQuizSetup()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-md">
+                        한 번 더 도전하기
+                    </button>
+                    <button onclick="navigate('home')" class="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition">
+                        학습 홈으로 이동
+                    </button>
                 </div>
             </div>
         </section>
@@ -108,11 +205,10 @@
                 </button>
                 <div>
                     <span id="drill-menu-subtitle" class="text-xs text-indigo-600 font-semibold uppercase tracking-wider">단원 선택됨</span>
-                    <h2 id="drill-menu-title" class="text-2xl font-extrabold text-slate-900">제 1과: 인사하기 (Greetings)</h2>
+                    <h2 id="drill-menu-title" class="text-2xl font-extrabold text-slate-900">-</h2>
                 </div>
             </div>
 
-            <!-- Dashboard Stats Summary -->
             <div class="grid grid-cols-3 gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center">
                 <div>
                     <div class="text-xs text-slate-500">단어 개수</div>
@@ -123,73 +219,34 @@
                     <div id="stats-sentence-count" class="text-lg font-bold text-emerald-600">-</div>
                 </div>
                 <div>
-                    <div class="text-xs text-slate-500">나의 완주율</div>
-                    <div id="stats-progress" class="text-lg font-bold text-amber-500">0%</div>
+                    <div class="text-xs text-slate-500">나의 상태</div>
+                    <div id="stats-progress" class="text-lg font-bold text-amber-500">대기중</div>
                 </div>
             </div>
 
             <div class="space-y-4">
-                <h3 class="font-bold text-slate-800 text-lg">단계별 반복 학습 코스 (5단계)</h3>
-                
+                <h3 class="font-bold text-slate-800 text-lg">단계별 정밀 복습 코스</h3>
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <!-- Step 1: Flashcard Drill -->
+                    <!-- 5 Steps Grid -->
                     <div onclick="startDrill(1)" class="bg-white hover:border-indigo-400 border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between group">
-                        <div>
-                            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">
-                                1
-                            </div>
-                            <h4 class="font-bold text-slate-800 mb-1">단어 플래시 카드</h4>
-                            <p class="text-xs text-slate-500">뜻과 소리를 매칭하며 단어의 의미를 정확하게 귀와 눈으로 각인합니다.</p>
-                        </div>
-                        <span class="mt-4 text-xs font-semibold text-indigo-600 flex items-center gap-1 group-hover:underline">시작하기 <i class="fa-solid fa-chevron-right"></i></span>
+                        <div><div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">1</div><h4 class="font-bold text-slate-800 mb-1">플래시 카드</h4><p class="text-xs text-slate-500">뜻과 소리를 매칭하며 의미를 정확하게 각인합니다.</p></div>
+                        <span class="mt-4 text-xs font-semibold text-indigo-600 flex items-center gap-1 group-hover:underline">시작 <i class="fa-solid fa-chevron-right"></i></span>
                     </div>
-
-                    <!-- Step 2: Typing Drill -->
                     <div onclick="startDrill(2)" class="bg-white hover:border-amber-400 border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between group">
-                        <div>
-                            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-amber-500 group-hover:text-white transition">
-                                2
-                            </div>
-                            <h4 class="font-bold text-slate-800 mb-1">단어 타이핑 훈련</h4>
-                            <p class="text-xs text-slate-500">한글 의미를 보고 직접 자판을 두드리며 영단어 스펠링을 체득합니다.</p>
-                        </div>
-                        <span class="mt-4 text-xs font-semibold text-amber-600 flex items-center gap-1 group-hover:underline">시작하기 <i class="fa-solid fa-chevron-right"></i></span>
+                        <div><div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-amber-500 group-hover:text-white transition">2</div><h4 class="font-bold text-slate-800 mb-1">단어 타이핑</h4><p class="text-xs text-slate-500">의미를 보고 자판을 두드리며 스펠링을 체득합니다.</p></div>
+                        <span class="mt-4 text-xs font-semibold text-amber-600 flex items-center gap-1 group-hover:underline">시작 <i class="fa-solid fa-chevron-right"></i></span>
                     </div>
-
-                    <!-- Step 3: Fill in Blank -->
                     <div onclick="startDrill(3)" class="bg-white hover:border-emerald-400 border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between group">
-                        <div>
-                            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-emerald-500 group-hover:text-white transition">
-                                3
-                            </div>
-                            <h4 class="font-bold text-slate-800 mb-1">문장 빈칸 채우기</h4>
-                            <p class="text-xs text-slate-500">핵심 예문 안에서 키워드 단어가 들어갈 올바른 자리를 추론하여 적어 봅니다.</p>
-                        </div>
-                        <span class="mt-4 text-xs font-semibold text-emerald-600 flex items-center gap-1 group-hover:underline">시작하기 <i class="fa-solid fa-chevron-right"></i></span>
+                        <div><div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-emerald-500 group-hover:text-white transition">3</div><h4 class="font-bold text-slate-800 mb-1">문장 빈칸 채우기</h4><p class="text-xs text-slate-500">예문 안에서 키워드 단어가 들어갈 자리를 매칭합니다.</p></div>
+                        <span class="mt-4 text-xs font-semibold text-emerald-600 flex items-center gap-1 group-hover:underline">시작 <i class="fa-solid fa-chevron-right"></i></span>
                     </div>
-
-                    <!-- Step 4: Unscramble -->
                     <div onclick="startDrill(4)" class="bg-white hover:border-pink-400 border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between group">
-                        <div>
-                            <div class="w-10 h-10 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-pink-500 group-hover:text-white transition">
-                                4
-                            </div>
-                            <h4 class="font-bold text-slate-800 mb-1">문장 카드 결합</h4>
-                            <p class="text-xs text-slate-500">흐트러진 어순 블록을 다시 올바르게 배열하며 영어식 어순 감각을 익힙니다.</p>
-                        </div>
-                        <span class="mt-4 text-xs font-semibold text-pink-600 flex items-center gap-1 group-hover:underline">시작하기 <i class="fa-solid fa-chevron-right"></i></span>
+                        <div><div class="w-10 h-10 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-pink-500 group-hover:text-white transition">4</div><h4 class="font-bold text-slate-800 mb-1">문장 카드 조립</h4><p class="text-xs text-slate-500">어순 블록을 다시 배열하며 구조 감각을 익힙니다.</p></div>
+                        <span class="mt-4 text-xs font-semibold text-pink-600 flex items-center gap-1 group-hover:underline">시작 <i class="fa-solid fa-chevron-right"></i></span>
                     </div>
-
-                    <!-- Step 5: Sentence Writing -->
                     <div onclick="startDrill(5)" class="bg-white hover:border-cyan-400 border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between group">
-                        <div>
-                            <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-cyan-500 group-hover:text-white transition">
-                                5
-                            </div>
-                            <h4 class="font-bold text-slate-800 mb-1">실전 문장 영작</h4>
-                            <p class="text-xs text-slate-500">한글 번역만 가이드로 제공되며, 영어 전체 문장을 자판으로 온전히 작성합니다.</p>
-                        </div>
-                        <span class="mt-4 text-xs font-semibold text-cyan-600 flex items-center gap-1 group-hover:underline">시작하기 <i class="fa-solid fa-chevron-right"></i></span>
+                        <div><div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-cyan-500 group-hover:text-white transition">5</div><h4 class="font-bold text-slate-800 mb-1">실전 통영작</h4><p class="text-xs text-slate-500">가이드 번역을 보고 전체 문장을 완전히 작성합니다.</p></div>
+                        <span class="mt-4 text-xs font-semibold text-cyan-600 flex items-center gap-1 group-hover:underline">시작 <i class="fa-solid fa-chevron-right"></i></span>
                     </div>
                 </div>
             </div>
@@ -202,30 +259,17 @@
                     <button onclick="navigate('drill-menu')" class="text-slate-500 hover:text-slate-800 transition p-1 text-sm">
                         <i class="fa-solid fa-circle-chevron-left text-xl"></i> 나가기
                     </button>
-                    <span id="play-drill-badge" class="bg-indigo-100 text-indigo-700 text-xs px-2.5 py-0.5 rounded font-bold">1단계</span>
+                    <span id="play-drill-badge" class="text-xs px-2.5 py-0.5 rounded font-bold">1단계</span>
                 </div>
-                <div class="text-sm font-semibold text-slate-500">
-                    진행도: <span id="play-progress-text" class="text-indigo-600">0/0</span>
-                </div>
+                <div class="text-sm font-semibold text-slate-500">진행도: <span id="play-progress-text" class="text-indigo-600">0/0</span></div>
             </div>
-
-            <!-- Progress Bar -->
             <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
                 <div id="play-progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
-
-            <!-- MAIN PLAY BOX -->
             <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 min-h-[350px] flex flex-col justify-between relative">
-                
-                <!-- PLAY INTERFACE CONTAINER (Dynamically Populated based on stage) -->
-                <div id="play-interactive-area" class="flex-grow flex flex-col justify-center items-center py-4">
-                    <!-- Inner drills will inject contents here -->
-                </div>
-
-                <!-- PLAY CONTROLS / RESULT REPORT -->
+                <div id="play-interactive-area" class="flex-grow flex flex-col justify-center items-center py-4"></div>
                 <div id="play-action-bar" class="pt-4 border-t border-slate-100 flex justify-between items-center">
                     <div>
-                        <!-- Optional speech / hint helper buttons -->
                         <button id="play-hint-btn" onclick="showHelpHint()" class="hidden text-slate-500 hover:text-slate-800 transition text-sm flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-lg font-medium">
                             <i class="fa-solid fa-lightbulb text-amber-500"></i> <span>힌트보기</span>
                         </button>
@@ -233,18 +277,13 @@
                             <i class="fa-solid fa-volume-high"></i> <span>발음 듣기</span>
                         </button>
                     </div>
-
                     <div class="flex space-x-2">
-                        <button id="play-skip-btn" onclick="skipItem()" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-xl hover:bg-slate-50 font-semibold transition text-sm">
-                            넘어가기
-                        </button>
-                        <button id="play-next-btn" onclick="checkOrNextItem()" class="px-6 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold transition text-sm shadow-md shadow-indigo-100 flex items-center gap-1">
+                        <button id="play-skip-btn" onclick="skipItem()" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-xl hover:bg-slate-50 font-semibold transition text-sm">넘어가기</button>
+                        <button id="play-next-btn" onclick="checkOrNextItem()" class="px-6 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold transition text-sm flex items-center gap-1">
                             <span id="play-next-label">확인하기</span> <i class="fa-solid fa-circle-check"></i>
                         </button>
                     </div>
                 </div>
-
-                <!-- Custom Notification message instead of alerts -->
                 <div id="play-feedback-banner" class="absolute inset-x-0 bottom-0 py-3 px-6 rounded-b-3xl text-center font-bold text-white transition-all duration-300 transform translate-y-full opacity-0 z-10 flex justify-between items-center">
                     <span id="play-feedback-text">잘했어요!</span>
                     <button onclick="dismissFeedback()" class="text-white hover:opacity-85 text-sm font-semibold">다음 <i class="fa-solid fa-arrow-right"></i></button>
@@ -258,182 +297,92 @@
                 <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-amber-100 text-amber-500 text-5xl mb-2 animate-bounce">
                     <i class="fa-solid fa-crown"></i>
                 </div>
-                
                 <div>
                     <h2 class="text-2xl font-extrabold text-slate-900">참 잘했어요! 완주 성공!</h2>
-                    <p id="result-drill-name" class="text-sm text-slate-500 font-semibold mt-1">1단계: 플래시 카드 학습</p>
-                    <p id="result-unit-name" class="text-xs text-indigo-600 font-bold">제 1과: 인사하기</p>
+                    <p id="result-drill-name" class="text-sm text-slate-500 font-semibold mt-1">-</p>
+                    <p id="result-unit-name" class="text-xs text-indigo-600 font-bold">-</p>
                 </div>
-
-                <!-- Stat summary -->
                 <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <div>
-                        <div class="text-xs text-slate-400 font-medium">학습 완료 문항</div>
-                        <div id="result-total-count" class="text-2xl font-bold text-slate-800">10 / 10</div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-slate-400 font-medium font-medium">정답률 / 스코어</div>
-                        <div id="result-score" class="text-2xl font-bold text-emerald-600">100%</div>
-                    </div>
+                    <div><div class="text-xs text-slate-400 font-medium">학습 완료 문항</div><div id="result-total-count" class="text-2xl font-bold text-slate-800">-</div></div>
+                    <div><div class="text-xs text-slate-400 font-medium">정답률 / 스코어</div><div id="result-score" class="text-2xl font-bold text-emerald-600">-</div></div>
                 </div>
-
                 <div class="flex flex-col space-y-2">
-                    <button onclick="navigate('drill-menu')" class="w-full py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold transition shadow-md shadow-indigo-100">
-                        단원 학습 메뉴로 돌아가기
-                    </button>
-                    <button onclick="navigate('home')" class="w-full py-3 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 font-semibold transition">
-                        다른 단원 탐색하기
-                    </button>
+                    <button onclick="navigate('drill-menu')" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition">단원 코스로 돌아가기</button>
+                    <button onclick="navigate('home')" class="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition">다른 단원 탐색하기</button>
                 </div>
             </div>
         </section>
+
+        <!-- ================= TEACHER PASSWORD ACCESS MODAL ================= -->
+        <div id="teacher-auth-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl space-y-4 text-center">
+                <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-lock"></i></div>
+                <div><h3 class="font-bold text-slate-900 text-lg">교사 관리자 인증</h3><p class="text-xs text-slate-400 mt-0.5">단원 편집을 위해 보안 패스워드를 입력하세요.</p></div>
+                <input type="password" id="teacher-access-password" placeholder="비밀번호 입력" class="w-full text-center px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-500 font-mono">
+                <div class="flex space-x-2">
+                    <button onclick="closeTeacherAccessModal()" class="w-1/2 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200 transition">취소</button>
+                    <button onclick="verifyTeacherAccessPassword()" class="w-1/2 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition">인증하기</button>
+                </div>
+            </div>
+        </div>
 
         <!-- ================= TEACHER DASHBOARD VIEW ================= -->
         <section id="view-teacher" class="view-section hidden space-y-6">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-user-gear text-indigo-600"></i> 교사용 콘텐츠 관리 시스템
-                    </h2>
-                    <p class="text-sm text-slate-500">단원을 새로 개설하거나 단어 및 핵심 표현들을 관리하세요. 모든 정보는 브라우저(로컬 스토리지)에 저장됩니다.</p>
+                    <h2 class="text-2xl font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-user-gear text-indigo-600"></i> 교사용 콘텐츠 관리 시스템</h2>
+                    <p class="text-sm text-slate-500">단원을 새로 개설하거나 데이터를 관리하세요. 수정한 내용을 배포하려면 JSON으로 내려받아 AI에게 전달하세요.</p>
                 </div>
-                
-                <div class="flex space-x-2">
-                    <button onclick="triggerExport()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-100 text-sm font-semibold transition flex items-center gap-1">
-                        <i class="fa-solid fa-file-export"></i> 내보내기 (JSON)
-                    </button>
-                    <button onclick="document.getElementById('import-file-input').click()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-100 text-sm font-semibold transition flex items-center gap-1">
-                        <i class="fa-solid fa-file-import"></i> 가져오기 (JSON)
-                    </button>
+                <div class="flex space-x-2 flex-wrap gap-2">
+                    <button onclick="resetToSystemDefault()" class="px-3 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl hover:bg-amber-100 text-xs font-bold transition flex items-center gap-1"><i class="fa-solid fa-rotate-left"></i> 기본 데이터로 초기화</button>
+                    <button onclick="triggerExport()" class="px-3 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-100 text-xs font-semibold transition flex items-center gap-1"><i class="fa-solid fa-file-export"></i> 내보내기 (JSON)</button>
+                    <button onclick="document.getElementById('import-file-input').click()" class="px-3 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-100 text-xs font-semibold transition flex items-center gap-1"><i class="fa-solid fa-file-import"></i> 가져오기 (JSON)</button>
                     <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="importDataFromFile(event)">
                 </div>
             </div>
-
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Left: Unit List and Creator -->
+                <!-- Left Unit List -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                    <h3 class="font-bold text-slate-800 text-lg border-b pb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-folder text-amber-500"></i> 단원 리스트
-                    </h3>
-
-                    <!-- Add New Unit Form -->
+                    <h3 class="font-bold text-slate-800 text-lg border-b pb-2 flex items-center gap-2"><i class="fa-solid fa-folder text-amber-500"></i> 단원 리스트</h3>
                     <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <div class="text-xs font-bold text-slate-500">새 단원 추가하기</div>
-                        <input type="text" id="teacher-new-unit-title" placeholder="예) Unit 3. 나의 가족 소개" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                        <button onclick="createNewUnit()" class="w-full py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition">
-                            단원 만들기
-                        </button>
+                        <input type="text" id="teacher-new-unit-title" placeholder="예) Unit 7. 나의 겨울 방학" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none">
+                        <button onclick="createNewUnit()" class="w-full py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold transition">단원 만들기</button>
                     </div>
-
-                    <!-- List of current Units -->
-                    <div id="teacher-unit-list" class="space-y-1 max-h-[300px] overflow-y-auto">
-                        <!-- Dynamic Units listed here -->
-                    </div>
+                    <div id="teacher-unit-list" class="space-y-1 max-h-[300px] overflow-y-auto"></div>
                 </div>
-
-                <!-- Right: Active Unit Content Editor (Word & Sentence) -->
+                <!-- Right Workspace Editors -->
                 <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-6">
                     <div class="flex justify-between items-center border-b pb-3">
-                        <div>
-                            <span class="text-xs text-indigo-600 font-semibold">선택된 단원 편집 중</span>
-                            <h3 id="teacher-active-unit-title" class="font-extrabold text-slate-900 text-lg">단원을 선택해 주세요</h3>
-                        </div>
-                        <button onclick="deleteCurrentUnit()" id="teacher-delete-unit-btn" class="hidden text-xs bg-rose-50 text-rose-600 border border-rose-100 px-3 py-1.5 rounded-lg hover:bg-rose-100 font-bold transition">
-                            단원 삭제
-                        </button>
+                        <div><h3 id="teacher-active-unit-title" class="font-extrabold text-slate-900 text-lg">단원을 선택해 주세요</h3></div>
+                        <button onclick="deleteCurrentUnit()" id="teacher-delete-unit-btn" class="hidden text-xs bg-rose-50 text-rose-600 border border-rose-100 px-3 py-1.5 rounded-lg font-bold transition">단원 삭제</button>
                     </div>
-
-                    <!-- If No Unit Selected State -->
-                    <div id="teacher-no-unit-selected" class="py-12 text-center text-slate-400">
-                        <i class="fa-solid fa-arrow-left-long text-4xl mb-2"></i>
-                        <p class="text-sm font-medium">왼쪽 단원 리스트에서 편집할 단원을 선택해 주세요.</p>
-                    </div>
-
-                    <!-- Editor Workspace (Visible only when unit selected) -->
+                    <div id="teacher-no-unit-selected" class="py-12 text-center text-slate-400"><i class="fa-solid fa-arrow-left-long text-4xl mb-2"></i><p class="text-sm">편집할 단원을 왼쪽에서 선택해 주세요.</p></div>
                     <div id="teacher-workspace" class="hidden space-y-6">
-                        
-                        <!-- 1. Word Manager -->
+                        <!-- Word Submanager -->
                         <div class="space-y-3">
-                            <h4 class="font-bold text-slate-800 flex justify-between items-center">
-                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-font text-indigo-500 text-sm"></i> 1. 단어 등록 및 관리</span>
-                                <span id="teacher-word-count-badge" class="text-xs font-medium bg-slate-100 px-2 py-0.5 rounded text-slate-600">0개 단어</span>
-                            </h4>
-
-                            <!-- Word Input Row -->
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                <input type="text" id="teacher-new-word-en" placeholder="영어 단어 (예: student)" class="text-sm px-3 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                                <input type="text" id="teacher-new-word-ko" placeholder="한글 의미 (예: 학생)" class="text-sm px-3 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                                <button onclick="addNewWordToUnit()" class="bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition py-1.5">
-                                    추가하기
-                                </button>
+                            <h4 class="font-bold text-slate-800 flex justify-between items-center"><span><i class="fa-solid fa-font text-indigo-500"></i> 단어 등록</span> <span id="teacher-word-count-badge" class="text-xs bg-slate-100 px-2 py-0.5 rounded">0개</span></h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl border">
+                                <input type="text" id="teacher-new-word-en" placeholder="영어 단어 (student)" class="text-sm px-3 py-1.5 border rounded-lg">
+                                <input type="text" id="teacher-new-word-ko" placeholder="한글 의미 (학생)" class="text-sm px-3 py-1.5 border rounded-lg">
+                                <button onclick="addNewWordToUnit()" class="bg-indigo-600 text-white text-sm font-bold rounded-lg transition py-1.5">추가하기</button>
                             </div>
-
-                            <!-- Word List -->
-                            <div class="max-h-[200px] overflow-y-auto border border-slate-100 rounded-xl">
-                                <table class="w-full text-left text-sm">
-                                    <thead class="bg-slate-50 text-slate-500 font-bold text-xs sticky top-0">
-                                        <tr>
-                                            <th class="p-2 pl-4">영어 단어</th>
-                                            <th class="p-2">우리말 의미</th>
-                                            <th class="p-2 text-right pr-4">삭제</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="teacher-words-tbody">
-                                        <!-- Words generated here -->
-                                    </tbody>
-                                </table>
-                            </div>
+                            <div class="max-h-[160px] overflow-y-auto border rounded-xl"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500 font-bold text-xs sticky top-0"><tr><th class="p-2 pl-4">영어</th><th class="p-2">뜻</th><th class="p-2 text-right pr-4">삭제</th></tr></thead><tbody id="teacher-words-tbody"></tbody></table></div>
                         </div>
-
-                        <!-- 2. Sentence Manager -->
+                        <!-- Sentence Submanager -->
                         <div class="space-y-3">
-                            <h4 class="font-bold text-slate-800 flex justify-between items-center">
-                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-quote-left text-emerald-500 text-sm"></i> 2. 핵심 문장 등록 및 관리</span>
-                                <span id="teacher-sentence-count-badge" class="text-xs font-medium bg-slate-100 px-2 py-0.5 rounded text-slate-600">0개 문장</span>
-                            </h4>
-
-                            <!-- Sentence Input Form -->
-                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+                            <h4 class="font-bold text-slate-800 flex justify-between items-center"><span><i class="fa-solid fa-quote-left text-emerald-500"></i> 핵심 문장 등록</span> <span id="teacher-sentence-count-badge" class="text-xs bg-slate-100 px-2 py-0.5 rounded">0개</span></h4>
+                            <div class="bg-slate-50 p-4 rounded-xl border space-y-3">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-xs font-bold text-slate-500 mb-1">영어 문장 (English Sentence)</label>
-                                        <input type="text" id="teacher-new-sentence-en" placeholder="영어 전문을 입력하세요 (예: I am a student.)" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-slate-500 mb-1">한글 의미 (Korean Translation)</label>
-                                        <input type="text" id="teacher-new-sentence-ko" placeholder="한글 번역을 입력하세요 (예: 나는 학생이다.)" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                                    </div>
+                                    <input type="text" id="teacher-new-sentence-en" placeholder="영어 예문 (I am a student.)" class="text-sm px-3 py-2 border rounded-lg w-full">
+                                    <input type="text" id="teacher-new-sentence-ko" placeholder="한글 해석 (나는 학생이다.)" class="text-sm px-3 py-2 border rounded-lg w-full">
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-xs font-bold text-slate-500 mb-1">빈칸 타겟 단어 (3단계 훈련용)</label>
-                                        <input type="text" id="teacher-new-sentence-blank" placeholder="문장 중 가려질 핵심 단어 (예: student)" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                                    </div>
-                                    <div class="flex items-end">
-                                        <button onclick="addNewSentenceToUnit()" class="w-full bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 transition py-2">
-                                            문장 추가하기
-                                        </button>
-                                    </div>
+                                    <input type="text" id="teacher-new-sentence-blank" placeholder="가려질 단어 (student)" class="text-sm px-3 py-2 border rounded-lg w-full">
+                                    <button onclick="addNewSentenceToUnit()" class="bg-emerald-600 text-white text-sm font-bold rounded-lg transition py-2">문장 추가</button>
                                 </div>
                             </div>
-
-                            <!-- Sentence List -->
-                            <div class="max-h-[220px] overflow-y-auto border border-slate-100 rounded-xl">
-                                <table class="w-full text-left text-sm">
-                                    <thead class="bg-slate-50 text-slate-500 font-bold text-xs sticky top-0">
-                                        <tr>
-                                            <th class="p-2 pl-4">영어 문장</th>
-                                            <th class="p-2">우리말 번역 / (빈칸 단어)</th>
-                                            <th class="p-2 text-right pr-4">삭제</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="teacher-sentences-tbody">
-                                        <!-- Sentences generated here -->
-                                    </tbody>
-                                </table>
-                            </div>
+                            <div class="max-h-[160px] overflow-y-auto border rounded-xl"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500 font-bold text-xs sticky top-0"><tr><th class="p-2 pl-4">영어 문장</th><th class="p-2">뜻 (빈칸단어)</th><th class="p-2 text-right pr-4">삭제</th></tr></thead><tbody id="teacher-sentences-tbody"></tbody></table></div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -441,127 +390,270 @@
 
     </main>
 
-    <!-- Custom Modal for Export Data (Easy copy paste) -->
+    <!-- Data Modal for Copy Paste -->
     <div id="export-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-slate-900 text-lg">데이터 백업 / 학생 배포 (JSON)</h3>
-                <button onclick="closeExportModal()" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <p class="text-xs text-slate-500 leading-relaxed">아래 데이터 코드를 복사하여 다른 PC 브라우저에 가져오기로 복제하거나, 학생들의 브라우저에 적용하여 커스텀 단원으로 배포할 수 있습니다.</p>
-            <textarea id="export-textarea" readonly class="w-full h-40 text-xs font-mono p-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500" onclick="this.select()"></textarea>
+            <div class="flex justify-between items-center border-b pb-2"><h3 class="font-bold text-slate-900 text-lg">데이터 내보내기 / 코드 매립용</h3><button onclick="closeExportModal()" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button></div>
+            <p class="text-xs text-slate-500">아래 코드를 복사하여 AI(Gemini)에게 전달하거나 파일로 소장해 두세요.</p>
+            <textarea id="export-textarea" readonly class="w-full h-40 text-xs font-mono p-3 bg-slate-50 border rounded-lg" onclick="this.select()"></textarea>
             <div class="flex space-x-2">
-                <button onclick="copyExportedText()" class="flex-grow py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition text-sm flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-copy"></i> 클립보드에 복사하기
-                </button>
-                <button onclick="downloadJsonFile()" class="py-2.5 px-4 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition text-sm">
-                    파일 다운로드 (.json)
-                </button>
+                <button onclick="copyExportedText()" class="flex-grow py-2.5 bg-indigo-600 text-white rounded-xl font-bold transition text-sm flex items-center justify-center gap-1"><i class="fa-solid fa-copy"></i> 복사하기</button>
+                <button onclick="downloadJsonFile()" class="py-2.5 px-4 bg-emerald-600 text-white rounded-xl font-bold transition text-sm">파일 다운로드</button>
             </div>
         </div>
     </div>
 
-    <!-- Password Gate Modal for Teacher Access -->
-    <div id="password-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden animate-fade-in">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl text-center space-y-4">
-            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto text-xl">
-                <i class="fa-solid fa-lock"></i>
-            </div>
-            <div>
-                <h3 class="font-bold text-slate-900 text-lg">교사용 관리자 인증</h3>
-                <p class="text-xs text-slate-500 mt-1">접근하려면 관리자 비밀번호를 입력하세요.</p>
-            </div>
-            <input type="password" id="password-input" placeholder="비밀번호 입력" 
-                   class="w-full text-center px-3 py-2 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 font-bold"
-                   onkeypress="if(event.key === 'Enter') verifyPassword()">
-            <div class="flex space-x-2">
-                <button onclick="closePasswordModal()" class="w-1/2 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold transition text-sm">취소</button>
-                <button onclick="verifyPassword()" class="w-1/2 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition text-sm">확인</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alert / Toast Modal -->
+    <!-- Toast Modal -->
     <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-full shadow-lg z-50 pointer-events-none transition-all duration-300 opacity-0 flex items-center gap-2">
-        <i class="fa-solid fa-circle-info text-amber-400"></i> <span id="toast-text">안내 메시지</span>
+        <i class="fa-solid fa-circle-info text-amber-400"></i> <span id="toast-text">-</span>
     </div>
 
     <!-- Footer -->
     <footer class="bg-slate-100 border-t border-slate-200 py-4 mt-12 text-center text-xs text-slate-500">
         <p>© 2026 EduDrill English. All Rights Reserved.</p>
-        <p class="mt-1">교사가 직접 단원을 커스터마이즈할 수 있는 자율 훈련용 템플릿입니다.</p>
     </footer>
 
-    <!-- Core App Logic -->
+    <!-- Core Application Logic Script -->
     <script>
-        // ================= BASELINE SEED DATA (Used if LocalStorage is empty) =================
+        // =========================================================================
+        // ⭐ [교사 전용 데이터 고정 구역 - 1~6과 적용 완료] ⭐
+        // =========================================================================
         const defaultLessons = [
-            {
-                id: "unit-1-default",
-                title: "제 1과: 인사와 자기소개 (Greetings)",
-                words: [
-                    { en: "meet", ko: "만나다" },
-                    { en: "name", ko: "이름" },
-                    { en: "friend", ko: "친구" },
-                    { en: "welcome", ko: "환영하다" },
-                    { en: "school", ko: "학교" }
-                ],
-                sentences: [
-                    { en: "Nice to meet you.", ko: "만나서 반갑다.", blank: "meet" },
-                    { en: "What is your name?", ko: "너의 이름은 무엇이니?", blank: "name" },
-                    { en: "He is my best friend.", ko: "그는 내 가장 친한 친구다.", blank: "friend" }
-                ]
-            },
-            {
-                id: "unit-2-default",
-                title: "제 2과: 나의 일상 생활 (Daily Routine)",
-                words: [
-                    { en: "breakfast", ko: "아침식사" },
-                    { en: "study", ko: "공부하다" },
-                    { en: "homework", ko: "숙제" },
-                    { en: "sleep", ko: "잠을 자다" },
-                    { en: "always", ko: "항상, 언제나" }
-                ],
-                sentences: [
-                    { en: "I eat breakfast at seven.", ko: "나는 7시에 아침을 먹는다.", blank: "breakfast" },
-                    { en: "We study English together.", ko: "우리는 영어공부를 함께 한다.", blank: "study" },
-                    { en: "Don't forget your homework.", ko: "너의 숙제를 잊지 마라.", blank: "homework" }
-                ]
-            }
+          {
+            "id": "unit-1781583413185",
+            "title": "1. What grade are you in?",
+            "words": [
+              { "en": "first", "ko": "첫 번째" },
+              { "en": "second", "ko": "두 번째" },
+              { "en": "third", "ko": "세 번째" },
+              { "en": "fourth", "ko": "네 번째" },
+              { "en": "fifth", "ko": "다섯 번째" },
+              { "en": "sixth", "ko": "여섯 번째" },
+              { "en": "club", "ko": "동아리" },
+              { "en": "floor", "ko": "층, 바닥" },
+              { "en": "grade", "ko": "학년" },
+              { "en": "group", "ko": "조, 그룹" },
+              { "en": "member", "ko": "부원, 회원" },
+              { "en": "mountain", "ko": "산" },
+              { "en": "race", "ko": "경주, 레이스" },
+              { "en": "team", "ko": "팀" },
+              { "en": "win", "ko": "이기다" }
+            ],
+            "sentences": [
+              { "en": "What grade are you in?", "ko": "너는 몇 학년이니?", "blank": "grade" },
+              { "en": "I’m in the first grade.", "ko": "나는 1학년이야.", "blank": "first grade" },
+              { "en": "I’m in the second grade.", "ko": "나는 2학년이야.", "blank": "second grade" },
+              { "en": "I’m in the third grade.", "ko": "나는 3학년이야.", "blank": "third grade" },
+              { "en": "I’m in the fourth grade.", "ko": "나는 4학년이야.", "blank": "fourth grade" },
+              { "en": "I’m in the fifth grade.", "ko": "나는 5학년이야.", "blank": "fifth grade" },
+              { "en": "I’m in the sixth grade.", "ko": "나는 6학년이야.", "blank": "sixth grade" },
+              { "en": "What club are you in?", "ko": "너는 어느 동아리니?", "blank": "club" },
+              { "en": "I’m in the soccer club.", "ko": "나는 축구 동아리야.", "blank": "soccer club" }
+            ]
+          },
+          {
+            "id": "unit-1781583915460",
+            "title": "2. I’m Going to Bake Cookies",
+            "words": [
+              { "en": "center", "ko": "센터" },
+              { "en": "drum", "ko": "드럼" },
+              { "en": "early", "ko": "일찍" },
+              { "en": "future", "ko": "미래" },
+              { "en": "guitar", "ko": "기타" },
+              { "en": "interest", "ko": "관심" },
+              { "en": "moon", "ko": "달" },
+              { "en": "travel", "ko": "여행" },
+              { "en": "weekend", "ko": "주말" },
+              { "en": "bake", "ko": "굽다" },
+              { "en": "cookies", "ko": "쿠키(들)" },
+              { "en": "library", "ko": "도서관" },
+              { "en": "shopping", "ko": "쇼핑" },
+              { "en": "lesson", "ko": "레슨" },
+              { "en": "visit", "ko": "방문하다" },
+              { "en": "museum", "ko": "박물관" },
+              { "en": "walk", "ko": "산책하다" }
+            ],
+            "sentences": [
+              { "en": "What are you going to do after school?", "ko": "너는 방과 후에 뭐 할 거야?", "blank": "after school" },
+              { "en": "I’m going to go to the library.", "ko": "나는 도서관에 갈 거야.", "blank": "go to the library" },
+              { "en": "What are you going to do this weekend?", "ko": "너는 이번 주말에 뭐 할 거야?", "blank": "weekend" },
+              { "en": "I’m going to take a guitar lesson.", "ko": "나는 기타 레슨을 받을 거야.", "blank": "take a guitar lesson" },
+              { "en": "What are you going to do tomorrow?", "ko": "너는 내일 뭐 할 거야?", "blank": "tomorrow" },
+              { "en": "I’m going to visit a museum.", "ko": "나는 박물관을 방문할 거야.", "blank": "visit a museum" },
+              { "en": "I’m interested in music.", "ko": "나는 음악에 관심이 있어.", "blank": "interested" }
+            ]
+          },
+          {
+            "id": "unit-1781587778809",
+            "title": "3. How About Planting Trees?",
+            "words": [
+              { "en": "campaign", "ko": "캠페인" },
+              { "en": "energy", "ko": "에너지" },
+              { "en": "guess", "ko": "추측하다" },
+              { "en": "hour", "ko": "시간" },
+              { "en": "light", "ko": "전등, 불" },
+              { "en": "off", "ko": "작동하지 않는, 끊긴" },
+              { "en": "point", "ko": "요소, 사항, 지적" },
+              { "en": "save", "ko": "구하다" },
+              { "en": "should", "ko": "~을 해야 한다" },
+              { "en": "use", "ko": "사용하다" },
+              { "en": "world", "ko": "세계" },
+              { "en": "reuse", "ko": "재사용하다" },
+              { "en": "plastic", "ko": "플라스틱" },
+              { "en": "plant", "ko": "심다" },
+              { "en": "ride", "ko": "타다" },
+              { "en": "clean", "ko": "청소하다" }
+            ],
+            "sentences": [
+              { "en": "How about planting trees?", "ko": "나무를 심는 게 어때?", "blank": "planting trees" },
+              { "en": "How about riding a bike?", "ko": "자전거를 타는 게 어때?", "blank": "riding a bike" },
+              { "en": "How about turning off the light?", "ko": "불을 끄는 게 어때?", "blank": "turning off the light" },
+              { "en": "How about cleaning up the beach?", "ko": "해변을 청소하는 게 어때?", "blank": "cleaning up the beach" },
+              { "en": "Sounds good.", "ko": "좋아.", "blank": "Sounds" },
+              { "en": "We should save the Earth.", "ko": "우리는 지구를 구해야 해.", "blank": "should" }
+            ]
+          },
+          {
+            "id": "unit-1781652881811",
+            "title": "4. When Is the School Festival?",
+            "words": [
+              { "en": "again", "ko": "다시" },
+              { "en": "before", "ko": "전에" },
+              { "en": "clothes", "ko": "옷" },
+              { "en": "festival", "ko": "축제" },
+              { "en": "number", "ko": "숫자" },
+              { "en": "party", "ko": "파티" },
+              { "en": "puppy", "ko": "강아지" },
+              { "en": "tail", "ko": "꼬리" },
+              { "en": "twenty-first", "ko": "21일" },
+              { "en": "when", "ko": "때" },
+              { "en": "January", "ko": "1월" },
+              { "en": "February", "ko": "2월" },
+              { "en": "March", "ko": "3월" },
+              { "en": "April", "ko": "4월" },
+              { "en": "May", "ko": "5월" },
+              { "en": "June", "ko": "6월" },
+              { "en": "July", "ko": "7월" },
+              { "en": "August", "ko": "8월" },
+              { "en": "September", "ko": "9월" },
+              { "en": "October", "ko": "10월" },
+              { "en": "November", "ko": "11월" },
+              { "en": "December", "ko": "12월" }
+            ],
+            "sentences": [
+              { "en": "When is the market day?", "ko": "알뜰 시장이 언제야?", "blank": "the market day?" },
+              { "en": "It’s on May 19th.", "ko": "5월 19일이야.", "blank": "May 19th" },
+              { "en": "When is the food festival?", "ko": "음식 축제가 언제야?", "blank": "the food festival" },
+              { "en": "It’s on June 7th.", "ko": "6월 7일이야.", "blank": "June 7th" },
+              { "en": "When is the baseball game?", "ko": "야구 경기가 언제야?", "blank": "the baseball game" },
+              { "en": "It’s on October 21st.", "ko": "10월 21일이야.", "blank": "October 21st" },
+              { "en": "Can you come to the market day?", "ko": "너는 알뜰 시장에 올 수 있니?", "blank": "come" },
+              { "en": "Can you come to the food festival?", "ko": "너는 음식 축제에 올 수 있니?", "blank": "Can you" },
+              { "en": "Can you come to the baseball game?", "ko": "너는 야구 경기에 올 수 있니?", "blank": "Can you come to" },
+              { "en": "Sure, I can.", "ko": "물론이야.", "blank": "Sure" }
+            ]
+          },
+          {
+            "id": "unit-1781653236632",
+            "title": "5. How Often Do you Exercise?",
+            "words": [
+              { "en": "brush", "ko": "닦다" },
+              { "en": "children", "ko": "아이들" },
+              { "en": "enough", "ko": "충분한" },
+              { "en": "habit", "ko": "습관" },
+              { "en": "hand", "ko": "손" },
+              { "en": "life", "ko": "삶, 생활" },
+              { "en": "meat", "ko": "고기" },
+              { "en": "month", "ko": "달, 월" },
+              { "en": "often", "ko": "자주" },
+              { "en": "present", "ko": "선물" },
+              { "en": "stay", "ko": "머무르다, 유지하다" },
+              { "en": "twice", "ko": "두번" },
+              { "en": "wash", "ko": "씻다" },
+              { "en": "weak", "ko": "주" }
+            ],
+            "sentences": [
+              { "en": "How often do you brush your teeth?", "ko": "너는 얼마나 자주 이를 닦니?", "blank": "brush your teeth" },
+              { "en": "I brush my teeth three times a day.", "ko": "나는 하루에 세 번 이를 닦아.", "blank": "three times a day" },
+              { "en": "How often do you exercise?", "ko": "너는 얼마나 자주 운동하니?", "blank": "exercise" },
+              { "en": "I exercise six times a week.", "ko": "나는 일주일에 여섯 번 운동해.", "blank": "six times a week" },
+              { "en": "How often do you eat fast food?", "ko": "너는 얼마나 자주 패스트푸드를 먹니?", "blank": "eat fast food" },
+              { "en": "I eat fast food twice a month.", "ko": "나는 한 달에 두 번 패스트푸드를 먹어.", "blank": "twice a month" },
+              { "en": "Good for you!", "ko": "잘했어!", "blank": "Good" }
+            ]
+          },
+          {
+            "id": "unit-1781653454908",
+            "title": "6. Your Ice Cream Is Bigger Than Mine",
+            "words": [
+              { "en": "above", "ko": "위에" },
+              { "en": "bridge", "ko": "다리" },
+              { "en": "cool", "ko": "시원한, 멋진" },
+              { "en": "heavy", "ko": "무거운" },
+              { "en": "people", "ko": "사람들" },
+              { "en": "strong", "ko": "힘이 센" },
+              { "en": "than", "ko": "~보다" },
+              { "en": "think", "ko": "생각하다" },
+              { "en": "which", "ko": "어느, 어느 것" }
+            ],
+            "sentences": [
+              { "en": "Which is heavier, the orange ball or the green ball?", "ko": "주황색 공과 초록색 공 중에 어느 것이 더 무거워?", "blank": "heavier" },
+              { "en": "The green ball is heavier than the orange ball.", "ko": "초록색 공이 주황색 공보다 더 무거워.", "blank": "heavier" },
+              { "en": "Who is faster, Suji or Anna?", "ko": "수지와 애나 중에 누가 더 빨라?", "blank": "faster" },
+              { "en": "Anna is faster than Suji.", "ko": "애나가 수지보다 더 빨라.", "blank": "faster" },
+              { "en": "I don’t think so.", "ko": "나는 그렇게 생각하지 않아.", "blank": "think" }
+            ]
+          }
         ];
 
         // ================= APP STATE =================
         let state = {
             units: [],
             activeUnitId: null,
-            activeDrillStep: 1, // 1 to 5
-            playList: [], // Compiled items for current drill
+            activeDrillStep: 1,
+            playList: [],
             playIndex: 0,
             score: 0,
-            activeItem: null, // item currently being tested
-            cardFlipped: false, // Step 1 tracking
-            unscrambleSelected: [], // Step 4 tracking
-            unscrambleRemaining: [], // Step 4 tracking
-            isTeacherAuthenticated: false // Password status for the active session
+            activeItem: null,
+            cardFlipped: false,
+            unscrambleSelected: [],
+            unscrambleRemaining: [],
+            isTeacherAuthenticated: false
         };
 
-        // ================= INITIALIZATION =================
+        // SPEED QUIZ ENGINE STATE
+        let quizState = {
+            selectedUnitIds: [],
+            pool: [],
+            currentItem: null,
+            currentType: 1,
+            correctAnswerString: "",
+            choices: [],
+            timer: null,
+            timeLeft: 30,
+            score: 0,
+            globalWords: [],
+            globalSentences: []
+        };
+
         window.onload = function() {
             loadAllData();
             navigate('home');
+            document.getElementById('teacher-access-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') verifyTeacherAccessPassword();
+            });
         };
 
-        // Save & Load LocalStorage
         function loadAllData() {
             const data = localStorage.getItem('edudrill_lessons');
             if (data) {
-                try {
-                    state.units = JSON.parse(data);
-                } catch (e) {
-                    state.units = [...defaultLessons];
+                try { 
+                    state.units = JSON.parse(data); 
+                } catch (e) { 
+                    state.units = JSON.parse(JSON.stringify(defaultLessons)); 
                 }
             } else {
-                state.units = [...defaultLessons];
+                state.units = JSON.parse(JSON.stringify(defaultLessons));
                 saveAllData();
             }
             renderHomeUnits();
@@ -572,128 +664,91 @@
             localStorage.setItem('edudrill_lessons', JSON.stringify(state.units));
         }
 
-        // ================= ROUTING & VIEWS =================
-        function navigate(viewId) {
-            // Guardrail: Intercept teacher view and check authentication
-            if (viewId === 'teacher' && !state.isTeacherAuthenticated) {
-                openPasswordModal();
-                return;
+        function resetToSystemDefault() {
+            if (confirm("🚨 주의: 지금까지 로컬에서 수정한 모든 데이터가 삭제되고, 제공된 기본 1~6과 데이터로 초기화됩니다. 진행하시겠습니까?")) {
+                state.units = JSON.parse(JSON.stringify(defaultLessons));
+                saveAllData();
+                loadAllData();
+                showToast("기본 데이터로 전체 초기화되었습니다.");
             }
+        }
 
-            // Hide all views
+        function navigate(viewId) {
             document.querySelectorAll('.view-section').forEach(sect => sect.classList.add('hidden'));
-            
-            // Show requested view
             const target = document.getElementById(`view-${viewId}`);
             if (target) target.classList.remove('hidden');
 
-            // Reset headers navigation state
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-indigo-700', 'ring-2', 'ring-indigo-300'));
-
             if (viewId === 'home') {
                 renderHomeUnits();
+                clearInterval(quizState.timer);
             } else if (viewId === 'teacher') {
                 renderTeacherUnits();
-                if (state.activeUnitId) {
-                    selectTeacherUnit(state.activeUnitId);
-                }
+                if (state.activeUnitId) selectTeacherUnit(state.activeUnitId);
             } else if (viewId === 'drill-menu') {
                 renderDrillMenu();
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // ================= PASSWORD GATE SYSTEM =================
-        function openPasswordModal() {
-            document.getElementById('password-modal').classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('password-input').focus();
-            }, 150);
-        }
-
-        function closePasswordModal() {
-            document.getElementById('password-modal').classList.add('hidden');
-            document.getElementById('password-input').value = '';
-        }
-
-        function verifyPassword() {
-            const input = document.getElementById('password-input');
-            const passwordValue = input.value;
-
-            if (passwordValue === 'EnglishStudy') {
-                state.isTeacherAuthenticated = true;
-                closePasswordModal();
-                navigate('teacher');
-                showToast("인증에 성공했습니다. 환영합니다, 선생님!");
-            } else {
-                showToast("비밀번호가 일치하지 않습니다. 다시 시도해 주세요.");
-                input.value = '';
-                input.focus();
-            }
-        }
-
-        // Show toast notification instead of alert
         function showToast(message) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-text').innerText = message;
             toast.classList.remove('opacity-0');
             toast.classList.add('opacity-100');
-            setTimeout(() => {
-                toast.classList.remove('opacity-100');
-                toast.classList.add('opacity-0');
-            }, 2500);
+            setTimeout(() => { toast.classList.remove('opacity-100'); toast.classList.add('opacity-0'); }, 2500);
         }
 
-        // ================= STUDENT FRONTEND RENDERERS =================
+        // ================= TEACHER SECURITY AUTHENTICATION =================
+        function openTeacherAccessModal() {
+            if (state.isTeacherAuthenticated) {
+                navigate('teacher');
+            } else {
+                document.getElementById('teacher-access-password').value = '';
+                document.getElementById('teacher-auth-modal').classList.remove('hidden');
+                setTimeout(() => document.getElementById('teacher-access-password').focus(), 200);
+            }
+        }
+
+        function closeTeacherAccessModal() {
+            document.getElementById('teacher-auth-modal').classList.add('hidden');
+        }
+
+        function verifyTeacherAccessPassword() {
+            const passwordInput = document.getElementById('teacher-access-password').value;
+            if (passwordInput === 'EnglishStudy') {
+                state.isTeacherAuthenticated = true;
+                closeTeacherAccessModal();
+                navigate('teacher');
+                showToast("교사 전용 인증에 성공했습니다.");
+            } else {
+                showToast("⚠️ 패스워드가 올바르지 않습니다!");
+            }
+        }
+
+        // ================= HOME & DRILL MENU RENDERERS =================
         function renderHomeUnits() {
             const container = document.getElementById('unit-grid');
-            const countBadge = document.getElementById('unit-count-badge');
+            document.getElementById('unit-count-badge').innerText = `총 ${state.units.length}개 단원`;
             container.innerHTML = '';
             
-            countBadge.innerText = `총 ${state.units.length}개 단원`;
-
             if (state.units.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full bg-white p-12 rounded-3xl text-center text-slate-400 border border-dashed border-slate-300">
-                        <i class="fa-solid fa-graduation-cap text-5xl mb-3"></i>
-                        <h4 class="font-bold text-slate-700">배치된 학습 단원이 없습니다.</h4>
-                        <p class="text-xs mt-1">오른쪽 위의 [교사용 관리자] 탭에서 새로운 영단어 학습을 등록해 주세요!</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400">등록된 학습 단원이 없습니다.</div>`;
                 return;
             }
 
             state.units.forEach(unit => {
-                const totalWords = unit.words ? unit.words.length : 0;
-                const totalSentences = unit.sentences ? unit.sentences.length : 0;
-
                 const card = document.createElement('div');
-                card.className = "bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition border border-slate-100 flex flex-col justify-between hover:-translate-y-1 transform duration-300 cursor-pointer";
-                card.onclick = () => {
-                    state.activeUnitId = unit.id;
-                    navigate('drill-menu');
-                };
-
+                card.className = "bg-white p-5 rounded-2xl shadow-sm hover:shadow-md transition border border-slate-100 flex flex-col justify-between cursor-pointer hover:-translate-y-0.5 duration-200";
+                card.onclick = () => { state.activeUnitId = unit.id; navigate('drill-menu'); };
                 card.innerHTML = `
                     <div>
-                        <div class="flex justify-between items-start mb-3">
-                            <span class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2 py-0.5 rounded">코스 활성</span>
-                            <div class="text-amber-400 text-xs flex gap-0.5">
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                            </div>
+                        <h4 class="font-extrabold text-slate-800 text-base leading-snug mb-2">${unit.title}</h4>
+                        <div class="flex gap-2 text-xs text-slate-500 font-semibold mb-3">
+                            <span class="bg-slate-50 px-2 py-0.5 rounded border">단어 ${unit.words?unit.words.length:0}</span>
+                            <span class="bg-slate-50 px-2 py-0.5 rounded border">문장 ${unit.sentences?unit.sentences.length:0}</span>
                         </div>
-                        <h4 class="font-extrabold text-slate-800 text-lg leading-tight mb-2 group-hover:text-indigo-600 transition">${unit.title}</h4>
-                        <p class="text-xs text-slate-500 flex items-center gap-1 mb-4">
-                            <span class="bg-slate-100 px-2 py-1 rounded font-semibold text-slate-600">단어 ${totalWords}</span>
-                            <span class="bg-slate-100 px-2 py-1 rounded font-semibold text-slate-600">문장 ${totalSentences}</span>
-                        </p>
                     </div>
-                    <div class="border-t pt-3 flex justify-between items-center text-xs">
-                        <span class="text-slate-400">학습 대상</span>
-                        <span class="text-indigo-600 font-bold flex items-center gap-1">시작하기 <i class="fa-solid fa-arrow-right-long"></i></span>
-                    </div>
+                    <div class="text-right text-xs font-bold text-indigo-600">드릴 트레이닝 진입 <i class="fa-solid fa-chevron-right text-[10px]"></i></div>
                 `;
                 container.appendChild(card);
             });
@@ -701,47 +756,272 @@
 
         function renderDrillMenu() {
             const unit = state.units.find(u => u.id === state.activeUnitId);
-            if (!unit) {
-                navigate('home');
+            if (!unit) { navigate('home'); return; }
+            document.getElementById('drill-menu-title').innerText = unit.title;
+            document.getElementById('stats-word-count').innerText = `${unit.words ? unit.words.length : 0}개`;
+            document.getElementById('stats-sentence-count').innerText = `${unit.sentences ? unit.sentences.length : 0}개`;
+        }
+
+        // ================= WEB SPEECH API (TTS) =================
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function speakActiveItem() {
+            if (!state.activeItem) return;
+            speakText(state.activeItem.en || state.activeItem.sentenceEn || "");
+        }
+
+        function speakQuizText() {
+            if (!quizState.currentItem) return;
+            const raw = quizState.currentItem;
+            const text = raw.en || raw.sentenceEn || raw.blank || "";
+            speakText(text);
+        }
+
+        // ================= SPEED SURVIVAL QUIZ ENGINE =================
+        function openSpeedQuizSetup() {
+            if (state.units.length === 0) {
+                showToast("학습할 단원 데이터가 전혀 없습니다.");
+                return;
+            }
+            const wrapper = document.getElementById('quiz-unit-checkboxes');
+            wrapper.innerHTML = '';
+
+            state.units.forEach((unit, idx) => {
+                const totalItems = (unit.words?.length || 0) + (unit.sentences?.length || 0);
+                const div = document.createElement('label');
+                div.className = "flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition";
+                div.innerHTML = `
+                    <input type="checkbox" value="${unit.id}" class="quiz-unit-cb rounded text-amber-500 focus:ring-amber-400 w-4 h-4" checked>
+                    <div class="text-sm font-bold text-slate-700 truncate flex-grow">${unit.title}</div>
+                    <span class="text-xs bg-white border px-2 py-0.5 rounded text-slate-500 font-semibold shrink-0">문항 ${totalItems}개</span>
+                `;
+                wrapper.appendChild(div);
+            });
+
+            document.getElementById('quiz-setup-modal').classList.remove('hidden');
+        }
+
+        function closeSpeedQuizSetup() {
+            document.getElementById('quiz-setup-modal').classList.add('hidden');
+        }
+
+        function startSpeedQuizGame() {
+            const checkboxes = document.querySelectorAll('.quiz-unit-cb');
+            quizState.selectedUnitIds = [];
+            checkboxes.forEach(cb => { if(cb.checked) quizState.selectedUnitIds.push(cb.value); });
+
+            if (quizState.selectedUnitIds.length === 0) {
+                showToast("최소 한 개 이상의 단원을 범위로 선택해야 합니다!");
                 return;
             }
 
-            document.getElementById('drill-menu-title').innerText = unit.title;
-            const wCount = unit.words ? unit.words.length : 0;
-            const sCount = unit.sentences ? unit.sentences.length : 0;
-            document.getElementById('stats-word-count').innerText = `${wCount}개`;
-            document.getElementById('stats-sentence-count').innerText = `${sCount}개`;
-            document.getElementById('stats-progress').innerText = (wCount > 0 && sCount > 0) ? '완벽 대기' : '미달성';
+            quizState.pool = [];
+            let totalWordsGlobal = [];
+            let totalSentencesGlobal = [];
+
+            state.units.forEach(u => {
+                if (quizState.selectedUnitIds.includes(u.id)) {
+                    if(u.words) u.words.forEach(w => {
+                        let item = { ...w, type: 'word', parentTitle: u.title };
+                        quizState.pool.push(item);
+                        totalWordsGlobal.push(w);
+                    });
+                    if(u.sentences) u.sentences.forEach(s => {
+                        let item = { ...s, type: 'sentence', parentTitle: u.title };
+                        quizState.pool.push(item);
+                        totalSentencesGlobal.push(s);
+                    });
+                }
+            });
+
+            if (quizState.pool.length < 4) {
+                showToast("💡 선택한 범위의 문항 수가 너무 적습니다 (최소 4개 항목 필요).");
+                return;
+            }
+
+            quizState.globalWords = totalWordsGlobal.length > 0 ? totalWordsGlobal : [{en:"dummy", ko:"더미"}];
+            quizState.globalSentences = totalSentencesGlobal.length > 0 ? totalSentencesGlobal : [{en:"dummy sentence", ko:"더미", blank:"dummy"}];
+
+            quizState.score = 0;
+            quizState.timeLeft = 30;
+            document.getElementById('quiz-score-text').innerText = "0";
+            closeSpeedQuizSetup();
+            navigate('quiz-play');
+
+            clearInterval(quizState.timer);
+            quizState.timer = setInterval(() => {
+                quizState.timeLeft -= 1;
+                if (quizState.timeLeft <= 0) {
+                    quizState.timeLeft = 0;
+                    endSpeedQuizGame();
+                }
+                updateQuizTimerUI();
+            }, 1000);
+
+            updateQuizTimerUI();
+            nextQuizQuestion();
         }
 
-        // ================= SPEECH (TTS) FUNCTION =================
-        function speakActiveItem() {
-            if (!state.activeItem) return;
-            let textToSpeak = "";
+        function updateQuizTimerUI() {
+            const bar = document.getElementById('quiz-timer-bar');
+            const txt = document.getElementById('quiz-timer-text');
             
-            // Check if current active item is a word or a sentence structure
-            if (state.activeItem.en) {
-                textToSpeak = state.activeItem.en;
-            } else if (state.activeItem.sentenceEn) {
-                textToSpeak = state.activeItem.sentenceEn;
-            }
+            let pct = (quizState.timeLeft / 30) * 100;
+            if (pct > 100) pct = 100;
+            if (pct < 0) pct = 0;
 
-            if (!textToSpeak) return;
+            bar.style.width = `${pct}%`;
+            txt.innerText = `${quizState.timeLeft}초 남음`;
 
-            // Use SpeechSynthesis
-            if ('speechSynthesis' in window) {
-                // Cancel active speeches
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(textToSpeak);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.85; // Slightly slower for training
-                window.speechSynthesis.speak(utterance);
+            if (quizState.timeLeft <= 8) {
+                bar.className = "bg-gradient-to-r from-red-500 to-rose-600 h-full animate-pulse";
             } else {
-                showToast("브라우저가 TTS 음성 출력을 지원하지 않습니다.");
+                bar.className = "bg-gradient-to-r from-orange-500 to-red-500 h-full";
             }
         }
 
-        // ================= DRILL ENGINE LOGIC =================
+        function nextQuizQuestion() {
+            const randomIdx = Math.floor(Math.random() * quizState.pool.length);
+            const item = quizState.pool[randomIdx];
+            quizState.currentItem = item;
+
+            let allowedTypes = [1, 2, 4];
+            if (item.type === 'sentence') {
+                allowedTypes.push(3); 
+            }
+            quizState.currentType = allowedTypes[Math.floor(Math.random() * allowedTypes.length)];
+
+            document.getElementById('quiz-listening-watermark').classList.add('hidden');
+
+            const badge = document.getElementById('quiz-type-badge');
+            const questionDisplay = document.getElementById('quiz-question-display');
+
+            let correctAnswer = "";
+            let wrongPool = [];
+
+            if (quizState.currentType === 1) {
+                badge.className = "inline-block px-3 py-1 bg-indigo-100 rounded-full text-xs font-bold text-indigo-700";
+                badge.innerText = "유형 1: 올바른 우리말 뜻 맞추기";
+                questionDisplay.innerText = item.type === 'word' ? item.en : item.en;
+                correctAnswer = item.ko;
+
+                if (item.type === 'word') {
+                    wrongPool = quizState.globalWords.map(w => w.ko);
+                } else {
+                    wrongPool = quizState.globalSentences.map(s => s.ko);
+                }
+            } 
+            else if (quizState.currentType === 2) {
+                badge.className = "inline-block px-3 py-1 bg-amber-100 rounded-full text-xs font-bold text-amber-700";
+                badge.innerText = "유형 2: 알맞은 영어 표현 고르기";
+                questionDisplay.innerText = item.ko;
+                correctAnswer = item.type === 'word' ? item.en : item.en;
+
+                if (item.type === 'word') {
+                    wrongPool = quizState.globalWords.map(w => w.en);
+                } else {
+                    wrongPool = quizState.globalSentences.map(s => s.en);
+                }
+            } 
+            else if (quizState.currentType === 3) {
+                badge.className = "inline-block px-3 py-1 bg-emerald-100 rounded-full text-xs font-bold text-emerald-700";
+                badge.innerText = "유형 3: 문장 빈칸 단어 추론하기";
+                
+                const safeRegex = new RegExp(item.blank.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+                const masked = item.en.replace(safeRegex, "_______");
+                questionDisplay.innerHTML = `<div class="text-sm text-slate-400 mb-1">뜻: ${item.ko}</div> <div>${masked}</div>`;
+                
+                correctAnswer = item.blank;
+                wrongPool = quizState.globalWords.map(w => w.en).concat(quizState.globalSentences.map(s => s.blank || ""));
+            } 
+            else if (quizState.currentType === 4) {
+                badge.className = "inline-block px-3 py-1 bg-pink-100 rounded-full text-xs font-bold text-pink-700";
+                badge.innerText = "유형 4: 🎧 리스닝 청해 평가";
+                document.getElementById('quiz-listening-watermark').classList.remove('hidden');
+                questionDisplay.innerText = "소리를 듣고 정답을 찾으세요!";
+                
+                correctAnswer = item.type === 'word' ? item.en : item.en;
+                if (item.type === 'word') {
+                    wrongPool = quizState.globalWords.map(w => w.en);
+                } else {
+                    wrongPool = quizState.globalSentences.map(s => s.en);
+                }
+            }
+
+            quizState.correctAnswerString = correctAnswer;
+
+            wrongPool = [...new Set(wrongPool)].filter(ans => ans !== correctAnswer && ans !== "");
+            wrongPool.sort(() => Math.random() - 0.5);
+            
+            let finalChoices = [correctAnswer];
+            for (let i = 0; i < 3; i++) {
+                if (wrongPool[i]) finalChoices.push(wrongPool[i]);
+                else finalChoices.push(i === 0 ? "first" : (i === 1 ? "second" : "third")); 
+            }
+
+            finalChoices.sort(() => Math.random() - 0.5);
+            quizState.choices = finalChoices;
+
+            for (let i = 0; i < 4; i++) {
+                const btn = document.getElementById(`quiz-choice-${i}`);
+                btn.querySelector('.choice-text').innerText = finalChoices[i];
+                btn.className = "quiz-choice-btn p-4 bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-400 font-bold text-left rounded-2xl text-slate-700 transition flex items-center justify-between group active:scale-95";
+            }
+
+            if (quizState.currentType === 4) {
+                setTimeout(speakQuizText, 250);
+            }
+        }
+
+        function submitQuizAnswer(chosenIdx) {
+            const chosenString = quizState.choices[chosenIdx];
+            const btn = document.getElementById(`quiz-choice-${chosenIdx}`);
+
+            if (chosenString === quizState.correctAnswerString) {
+                quizState.score += 10;
+                quizState.timeLeft += 5;
+                document.getElementById('quiz-score-text').innerText = quizState.score;
+                showToast("정답! 시간 +5초 ⏱️");
+                btn.className = "quiz-choice-btn p-4 bg-emerald-500 border-2 border-emerald-600 font-bold text-left rounded-2xl text-white transition flex items-center justify-between";
+            } else {
+                quizState.timeLeft -= 5;
+                if (quizState.timeLeft < 0) quizState.timeLeft = 0;
+                showToast("❌ 오답! 시간 -5초");
+                btn.className = "quiz-choice-btn p-4 bg-rose-500 border-2 border-rose-600 font-bold text-left rounded-2xl text-white transition flex items-center justify-between";
+            }
+
+            updateQuizTimerUI();
+            
+            setTimeout(() => {
+                if (quizState.timeLeft <= 0) {
+                    endSpeedQuizGame();
+                } else {
+                    nextQuizQuestion();
+                }
+            }, 400);
+        }
+
+        function terminateSpeedQuiz() {
+            if (confirm("현재 진행 중인 퀴즈를 중단하고 나가시겠습니까?")) {
+                endSpeedQuizGame();
+            }
+        }
+
+        function endSpeedQuizGame() {
+            clearInterval(quizState.timer);
+            navigate('quiz-result');
+            document.getElementById('quiz-final-score').innerText = `${quizState.score} 점`;
+        }
+
+        // ================= DRILL TRAINING CORE LOGIC =================
         function startDrill(step) {
             const unit = state.units.find(u => u.id === state.activeUnitId);
             if (!unit) return;
@@ -751,39 +1031,18 @@
             state.score = 0;
             state.playList = [];
 
-            // Compile Play list based on step
             if (step === 1 || step === 2) {
-                // Word drills
-                if (!unit.words || unit.words.length === 0) {
-                    showToast("이 단원에는 학습할 단어가 등록되어 있지 않습니다!");
-                    return;
-                }
-                // Clone words list
+                if (!unit.words || unit.words.length === 0) { showToast("등록된 단어가 없습니다!"); return; }
                 state.playList = unit.words.map(w => ({ ...w, type: 'word' }));
             } else {
-                // Sentence drills (Step 3, 4, 5)
-                if (!unit.sentences || unit.sentences.length === 0) {
-                    showToast("이 단원에는 학습할 문장이 등록되어 있지 않습니다!");
-                    return;
-                }
-                state.playList = unit.sentences.map(s => ({
-                    sentenceEn: s.en,
-                    sentenceKo: s.ko,
-                    targetBlank: s.blank,
-                    type: 'sentence'
-                }));
+                if (!unit.sentences || unit.sentences.length === 0) { showToast("등록된 핵심 문장이 없습니다!"); return; }
+                state.playList = unit.sentences.map(s => ({ sentenceEn: s.en, sentenceKo: s.ko, targetBlank: s.blank, type: 'sentence' }));
             }
 
-            // Shuffle play list for dynamic drilling
             state.playList.sort(() => Math.random() - 0.5);
-
-            // Display Drill UI Setup
             const badge = document.getElementById('play-drill-badge');
-            const badges = ["", "1단계: 플래시 카드", "2단계: 단어 타이핑", "3단계: 문장 빈칸 채우기", "4단계: 문장 카드 결합", "5단계: 실전 영작문"];
-            const colors = ["", "bg-indigo-100 text-indigo-700", "bg-amber-100 text-amber-700", "bg-emerald-100 text-emerald-700", "bg-pink-100 text-pink-700", "bg-cyan-100 text-cyan-700"];
-            
-            badge.className = `text-xs px-2.5 py-0.5 rounded font-bold ${colors[step]}`;
-            badge.innerText = badges[step];
+            const labels = ["", "1단계: 플래시 카드", "2단계: 단어 타이핑", "3단계: 빈칸 채우기", "4단계: 문장 카드 결합", "5단계: 실전 영작문"];
+            badge.innerText = labels[step];
 
             navigate('drill-play');
             loadPlayItem();
@@ -791,667 +1050,316 @@
 
         function loadPlayItem() {
             dismissFeedback();
-            
-            if (state.playIndex >= state.playList.length) {
-                // Complete!
-                finishDrill();
-                return;
-            }
+            if (state.playIndex >= state.playList.length) { finishDrill(); return; }
 
             state.activeItem = state.playList[state.playIndex];
-            
-            // Progress tracker
-            const currentNum = state.playIndex + 1;
-            const totalNum = state.playList.length;
-            document.getElementById('play-progress-text').innerText = `${currentNum} / ${totalNum}`;
-            document.getElementById('play-progress-bar').style.width = `${(state.playIndex / totalNum) * 100}%`;
+            document.getElementById('play-progress-text').innerText = `${state.playIndex + 1} / ${state.playList.length}`;
+            document.getElementById('play-progress-bar').style.width = `${(state.playIndex / state.playList.length) * 100}%`;
 
-            // Setup buttons
             document.getElementById('play-next-label').innerText = "확인하기";
             document.getElementById('play-hint-btn').classList.add('hidden');
             document.getElementById('play-speech-btn').classList.add('hidden');
 
-            // Render interactive view by stage
             const area = document.getElementById('play-interactive-area');
             area.innerHTML = '';
+            area.className = "flex-grow flex flex-col justify-center items-center py-4 w-full";
 
-            if (state.activeDrillStep === 1) {
-                renderStep1(area);
-            } else if (state.activeDrillStep === 2) {
-                renderStep2(area);
-            } else if (state.activeDrillStep === 3) {
-                renderStep3(area);
-            } else if (state.activeDrillStep === 4) {
-                renderStep4(area);
-            } else if (state.activeDrillStep === 5) {
-                renderStep5(area);
-            }
+            if (state.activeDrillStep === 1) renderStep1(area);
+            else if (state.activeDrillStep === 2) renderStep2(area);
+            else if (state.activeDrillStep === 3) renderStep3(area);
+            else if (state.activeDrillStep === 4) renderStep4(area);
+            else if (state.activeDrillStep === 5) renderStep5(area);
 
-            // Play voice by default in Step 1 & Step 4 to help student
-            if (state.activeDrillStep === 1) {
-                setTimeout(speakActiveItem, 300);
-            }
+            if (state.activeDrillStep === 1) setTimeout(speakActiveItem, 300);
         }
 
-        function skipItem() {
-            state.playIndex++;
-            loadPlayItem();
-        }
-
-        // Dismiss feedback banner
+        function skipItem() { state.playIndex++; loadPlayItem(); }
         function dismissFeedback() {
-            const banner = document.getElementById('play-feedback-banner');
-            banner.className = "absolute inset-x-0 bottom-0 py-3 px-6 rounded-b-3xl text-center font-bold text-white transition-all duration-300 transform translate-y-full opacity-0 z-10 flex justify-between items-center";
+            document.getElementById('play-feedback-banner').className = "absolute inset-x-0 bottom-0 py-3 px-6 rounded-b-3xl text-center font-bold text-white transition-all duration-300 transform translate-y-full opacity-0 z-10 flex justify-between items-center";
         }
 
         function showFeedbackBanner(isCorrect, message) {
             const banner = document.getElementById('play-feedback-banner');
-            const textSpan = document.getElementById('play-feedback-text');
-            
-            textSpan.innerText = message;
-            
+            document.getElementById('play-feedback-text').innerText = message;
             banner.className = `absolute inset-x-0 bottom-0 py-4 px-6 rounded-b-3xl text-center font-bold text-white transition-all duration-300 transform translate-y-0 opacity-100 z-10 flex justify-between items-center ${isCorrect ? 'bg-emerald-500' : 'bg-rose-500'}`;
-            
-            // Turn next button into Advance button
             document.getElementById('play-next-label').innerText = "다음 문제";
         }
 
         function checkOrNextItem() {
-            const nextLabel = document.getElementById('play-next-label').innerText;
-            if (nextLabel === "다음 문제" || nextLabel === "넘어가기") {
-                state.playIndex++;
-                loadPlayItem();
-                return;
-            }
+            const label = document.getElementById('play-next-label').innerText;
+            if (label === "다음 문제") { state.playIndex++; loadPlayItem(); return; }
 
-            // Implement validation per step
             if (state.activeDrillStep === 1) {
-                // Flashcards just advance
-                state.score += 100; // Perfect score for learning
-                showFeedbackBanner(true, `단어 암기 완료: ${state.activeItem.en}`);
-            } 
-            else if (state.activeDrillStep === 2) {
-                // Word Typing check
-                const inputVal = document.getElementById('step2-input').value.trim().toLowerCase();
-                const correctVal = state.activeItem.en.trim().toLowerCase();
-                
-                if (inputVal === correctVal) {
-                    state.score += 100;
-                    speakActiveItem();
-                    showFeedbackBanner(true, `참 잘했어요! 정답입니다. [${state.activeItem.en}]`);
-                } else {
-                    showFeedbackBanner(false, `아쉬워요! 정답은 [ ${state.activeItem.en} ] 입니다.`);
-                }
-            } 
-            else if (state.activeDrillStep === 3) {
-                // Fill in the blank check
-                const inputVal = document.getElementById('step3-input').value.trim().toLowerCase();
-                const correctVal = state.activeItem.targetBlank.trim().toLowerCase();
-
-                if (inputVal === correctVal) {
-                    state.score += 100;
-                    speakActiveItem();
-                    showFeedbackBanner(true, `정답입니다! 완성 문장: "${state.activeItem.sentenceEn}"`);
-                } else {
-                    showFeedbackBanner(false, `오답입니다. 빈칸 단어는 [ ${state.activeItem.targetBlank} ] 입니다.`);
-                }
-            } 
-            else if (state.activeDrillStep === 4) {
-                // Unscramble check
-                const constructed = state.unscrambleSelected.join(' ');
-                const originalClean = cleanSentenceForUnscramble(state.activeItem.sentenceEn);
-                
-                if (constructed === originalClean) {
-                    state.score += 100;
-                    speakActiveItem();
-                    showFeedbackBanner(true, `어순 조립 완벽합니다!`);
-                } else {
-                    showFeedbackBanner(false, `틀렸습니다! 정답: "${state.activeItem.sentenceEn}"`);
-                }
-            } 
-            else if (state.activeDrillStep === 5) {
-                // Real Writing check
-                const inputVal = document.getElementById('step5-textarea').value.trim().toLowerCase().replace(/[.,?!]/g, "");
-                const correctVal = state.activeItem.sentenceEn.trim().toLowerCase().replace(/[.,?!]/g, "");
-
-                if (inputVal === correctVal) {
-                    state.score += 100;
-                    speakActiveItem();
-                    showFeedbackBanner(true, `퍼펙트 영작 완성! 정답입니다.`);
-                } else {
-                    showFeedbackBanner(false, `아쉬워요! 정답: "${state.activeItem.sentenceEn}"`);
-                }
+                state.score += 100;
+                showFeedbackBanner(true, `단어 암기 체크 완료: ${state.activeItem.en}`);
+            } else if (state.activeDrillStep === 2) {
+                const val = document.getElementById('step2-input').value.trim().toLowerCase();
+                if (val === state.activeItem.en.trim().toLowerCase()) {
+                    state.score += 100; speakActiveItem(); showFeedbackBanner(true, `정답입니다! [ ${state.activeItem.en} ]`);
+                } else { showFeedbackBanner(false, `오답입니다. 정답은 [ ${state.activeItem.en} ]`); }
+            } else if (state.activeDrillStep === 3) {
+                const val = document.getElementById('step3-input').value.trim().toLowerCase();
+                if (val === state.activeItem.targetBlank.trim().toLowerCase()) {
+                    state.score += 100; speakActiveItem(); showFeedbackBanner(true, `정답입니다!`);
+                } else { showFeedbackBanner(false, `오답입니다. 빈칸 단어는 [ ${state.activeItem.targetBlank} ]`); }
+            } else if (state.activeDrillStep === 4) {
+                const userString = state.unscrambleSelected.join(' ');
+                const correctString = state.activeItem.sentenceEn.replace(/[.,?!]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+                if (userString === correctString) {
+                    state.score += 100; speakActiveItem(); showFeedbackBanner(true, `완벽한 문장 결합입니다!`);
+                } else { showFeedbackBanner(false, `순서가 틀렸습니다. 정답: "${state.activeItem.sentenceEn}"`); }
+            } else if (state.activeDrillStep === 5) {
+                const val = document.getElementById('step5-textarea').value.trim().toLowerCase().replace(/[.,?!]/g, "");
+                const correct = state.activeItem.sentenceEn.trim().toLowerCase().replace(/[.,?!]/g, "");
+                if (val === correct) {
+                    state.score += 100; speakActiveItem(); showFeedbackBanner(true, `우수한 통영작 성공!`);
+                } else { showFeedbackBanner(false, `오답입니다. 정답: "${state.activeItem.sentenceEn}"`); }
             }
         }
 
-        // Helper helper to clean strings for comparison
-        function cleanSentenceForUnscramble(sentence) {
-            return sentence.replace(/[.,?!]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
-        }
-
-        // ================= INDIVIDUAL STEP INTERFACE RENDERS =================
-
-        // Step 1: Flashcards
+        // --- SUB STEP INTERFACE GENERATORS ---
         function renderStep1(parent) {
             document.getElementById('play-speech-btn').classList.remove('hidden');
-            state.cardFlipped = false;
-
-            const cardWrapper = document.createElement('div');
-            cardWrapper.className = "perspective-1000 w-full max-w-sm h-60 cursor-pointer";
-            
-            const cardInner = document.createElement('div');
-            cardInner.id = "flashcard-inner";
-            cardInner.className = "w-full h-full duration-500 preserve-3d relative rounded-3xl border border-slate-100 shadow-md";
-            
-            // Flip behavior
-            cardWrapper.onclick = () => {
+            const wrapper = document.createElement('div');
+            wrapper.className = "perspective-1000 w-full max-w-sm h-52 cursor-pointer";
+            const inner = document.createElement('div');
+            inner.className = "w-full h-full duration-500 preserve-3d relative rounded-3xl border shadow-sm";
+            wrapper.onclick = () => {
                 state.cardFlipped = !state.cardFlipped;
-                if (state.cardFlipped) {
-                    cardInner.classList.add('rotate-y-180');
-                } else {
-                    cardInner.classList.remove('rotate-y-180');
-                }
+                if(state.cardFlipped) inner.classList.add('rotate-y-180');
+                else inner.classList.remove('rotate-y-180');
             };
-
-            cardInner.innerHTML = `
-                <!-- Front Page: English -->
-                <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-indigo-600 rounded-3xl backface-hidden text-white flex flex-col justify-between p-6">
-                    <span class="text-[10px] uppercase font-bold tracking-widest text-indigo-200">영어 단어 (클릭하여 뒤집기)</span>
-                    <div class="text-center">
-                        <div class="text-4xl md:text-5xl font-extrabold tracking-wide">${state.activeItem.en}</div>
-                    </div>
-                    <div class="text-center text-indigo-200 text-xs flex justify-center items-center gap-1">
-                        <i class="fa-solid fa-rotate"></i> 카드를 탭하면 의미가 나타납니다
-                    </div>
+            inner.innerHTML = `
+                <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-indigo-600 rounded-3xl backface-hidden text-white flex flex-col justify-between p-6 text-center">
+                    <span class="text-[10px] uppercase font-bold tracking-widest text-indigo-200">English Word</span>
+                    <div class="text-3xl font-black">${state.activeItem.en}</div>
+                    <div class="text-[11px] text-indigo-200"><i class="fa-solid fa-rotate"></i> 카드를 누르면 뜻이 나옵니다</div>
                 </div>
-                <!-- Back Page: Korean -->
-                <div class="absolute inset-0 bg-slate-800 rounded-3xl backface-hidden text-white rotate-y-180 flex flex-col justify-between p-6">
+                <div class="absolute inset-0 bg-slate-800 rounded-3xl backface-hidden text-white rotate-y-180 flex flex-col justify-between p-6 text-center">
                     <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400">우리말 뜻</span>
-                    <div class="text-center">
-                        <div class="text-3xl font-extrabold text-amber-300 leading-snug">${state.activeItem.ko}</div>
-                    </div>
-                    <div class="text-center text-slate-400 text-xs">
-                        뜻을 충분히 숙지했다면 [확인하기]를 클릭하세요
-                    </div>
+                    <div class="text-2xl font-bold text-amber-300">${state.activeItem.ko}</div>
+                    <div class="text-[11px] text-slate-400">확인한 뒤 하단의 버튼을 누르세요</div>
                 </div>
             `;
-            
-            cardWrapper.appendChild(cardInner);
-            parent.appendChild(cardWrapper);
+            wrapper.appendChild(inner); parent.appendChild(wrapper);
         }
 
-        // Step 2: Typing Drill
         function renderStep2(parent) {
             document.getElementById('play-hint-btn').classList.remove('hidden');
             document.getElementById('play-speech-btn').classList.remove('hidden');
-
-            parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-md space-y-6";
-            
+            parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-sm space-y-4";
             parent.innerHTML = `
-                <div class="text-center space-y-1">
-                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">우리말 단어 뜻</span>
-                    <h3 class="text-3xl font-extrabold text-slate-900">${state.activeItem.ko}</h3>
-                </div>
-
-                <div class="w-full relative">
-                    <input type="text" id="step2-input" autocomplete="off" autofocus placeholder="여기에 올바른 영어 단어를 타이핑하세요" 
-                           class="w-full text-center text-xl font-bold py-3.5 px-4 border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 tracking-wide shadow-inner">
-                </div>
+                <div class="text-center"><span class="text-xs text-slate-400 font-bold">우리말 뜻</span><h3 class="text-2xl font-black text-slate-900">${state.activeItem.ko}</h3></div>
+                <input type="text" id="step2-input" autocomplete="off" placeholder="영어 스펠링 타이핑" class="w-full text-center text-lg font-bold py-3 border-2 rounded-xl focus:outline-none focus:border-indigo-500">
             `;
-
-            // Support enter key submission
-            document.getElementById('step2-input').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') checkOrNextItem();
-            });
+            document.getElementById('step2-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkOrNextItem(); });
         }
 
-        // Step 3: Fill in the blank
         function renderStep3(parent) {
             document.getElementById('play-hint-btn').classList.remove('hidden');
             document.getElementById('play-speech-btn').classList.remove('hidden');
-
-            parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-lg space-y-6";
-
-            // Mask the target blank in English sentence
-            const regex = new RegExp(`\\b${state.activeItem.targetBlank}\\b`, 'gi');
-            const placeholder = "________";
-            const maskedEn = state.activeItem.sentenceEn.replace(regex, placeholder);
-
+            parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-md space-y-4";
+            
+            const safeRegex = new RegExp(state.activeItem.targetBlank.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+            const masked = state.activeItem.sentenceEn.replace(safeRegex, "_______");
             parent.innerHTML = `
-                <div class="text-center space-y-2">
-                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">한국어 해석 문장</span>
-                    <h3 class="text-xl font-bold text-slate-800 leading-relaxed">"${state.activeItem.sentenceKo}"</h3>
-                </div>
-
-                <div class="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100 text-center w-full">
-                    <p class="text-lg md:text-xl font-semibold text-indigo-900 tracking-wide">${maskedEn}</p>
-                </div>
-
-                <div class="w-full">
-                    <label class="block text-xs font-bold text-slate-400 mb-1.5 text-center">빈칸에 들어갈 영어 단어</label>
-                    <input type="text" id="step3-input" autocomplete="off" autofocus placeholder="단어를 입력하세요" 
-                           class="w-full text-center text-lg font-bold py-3 px-4 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 tracking-wide">
-                </div>
+                <div class="text-center"><span class="text-xs text-slate-400 font-bold">한국어 번역</span><h3 class="text-base font-bold text-slate-800">"${state.activeItem.sentenceKo}"</h3></div>
+                <div class="bg-indigo-50/50 p-4 rounded-xl border text-center w-full font-semibold text-indigo-900">${masked}</div>
+                <input type="text" id="step3-input" autocomplete="off" placeholder="빈칸 채우기 단어" class="w-full text-center py-2.5 border-2 rounded-xl focus:outline-none">
             `;
-
-            document.getElementById('step3-input').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') checkOrNextItem();
-            });
+            document.getElementById('step3-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkOrNextItem(); });
         }
 
-        // Step 4: Unscramble Sentence
         function renderStep4(parent) {
             document.getElementById('play-speech-btn').classList.remove('hidden');
-            parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-2xl space-y-6";
-
-            // Clean sentence and slice to cards
-            const originalWords = state.activeItem.sentenceEn
-                .replace(/[.,?!]/g, "")
-                .split(/\s+/)
-                .filter(w => w.trim() !== "");
-
+            parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-xl space-y-4";
+            const originalWords = state.activeItem.sentenceEn.replace(/[.,?!]/g, "").split(/\s+/).filter(w => w.trim() !== "");
             state.unscrambleSelected = [];
-            // Copy and shuffle
             state.unscrambleRemaining = [...originalWords].sort(() => Math.random() - 0.5);
 
             parent.innerHTML = `
-                <div class="text-center space-y-2">
-                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">한국어 뜻에 맞춰 어순을 완성하세요</span>
-                    <h3 class="text-xl font-bold text-slate-800">"${state.activeItem.sentenceKo}"</h3>
-                </div>
-
-                <!-- Selected workspace -->
-                <div class="w-full min-h-[70px] p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-wrap gap-2 items-center" id="unscramble-selected-box">
-                    <span class="text-xs text-slate-400 font-medium">아래 카드를 순서대로 탭하세요...</span>
-                </div>
-
-                <!-- Remaining word pool -->
-                <div class="w-full p-4 border border-dashed border-slate-200 rounded-2xl flex flex-wrap gap-2.5 justify-center" id="unscramble-remaining-box">
-                    <!-- Word tags -->
-                </div>
+                <div class="text-center"><h3 class="text-base font-bold text-slate-800">"${state.activeItem.sentenceKo}"</h3></div>
+                <div class="w-full min-h-[60px] p-3 bg-slate-50 border rounded-xl flex flex-wrap gap-1.5" id="unscramble-selected-box"></div>
+                <div class="w-full p-3 border border-dashed rounded-xl flex flex-wrap gap-2 justify-center" id="unscramble-remaining-box"></div>
             `;
-
             drawUnscramblePiles();
         }
 
         function drawUnscramblePiles() {
-            const selectedBox = document.getElementById('unscramble-selected-box');
-            const remainingBox = document.getElementById('unscramble-remaining-box');
+            const sBox = document.getElementById('unscramble-selected-box');
+            const rBox = document.getElementById('unscramble-remaining-box');
+            sBox.innerHTML = ''; rBox.innerHTML = '';
 
-            selectedBox.innerHTML = '';
-            if (state.unscrambleSelected.length === 0) {
-                selectedBox.innerHTML = '<span class="text-xs text-slate-400 font-medium py-1">이곳에 완성된 문장이 조합됩니다...</span>';
-            } else {
-                state.unscrambleSelected.forEach((word, idx) => {
-                    const block = document.createElement('button');
-                    block.className = "px-3.5 py-1.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-700 transition flex items-center gap-1.5 shadow-sm";
-                    block.innerHTML = `<span>${word}</span> <i class="fa-solid fa-xmark text-[10px] text-indigo-300"></i>`;
-                    block.onclick = () => {
-                        // Return word back to pool
-                        state.unscrambleSelected.splice(idx, 1);
-                        state.unscrambleRemaining.push(word);
-                        drawUnscramblePiles();
-                    };
-                    selectedBox.appendChild(block);
-                });
-            }
+            if(state.unscrambleSelected.length===0) sBox.innerHTML = '<span class="text-xs text-slate-400">단어 블록을 아래에서 순서대로 누르세요...</span>';
+            state.unscrambleSelected.forEach((word, idx) => {
+                const b = document.createElement('button');
+                b.className = "px-2.5 py-1 bg-indigo-600 text-white font-semibold text-xs rounded-lg shadow-sm";
+                b.innerText = word;
+                b.onclick = () => { state.unscrambleSelected.splice(idx,1); state.unscrambleRemaining.push(word); drawUnscramblePiles(); };
+                sBox.appendChild(b);
+            });
 
-            remainingBox.innerHTML = '';
-            if (state.unscrambleRemaining.length === 0) {
-                remainingBox.innerHTML = '<span class="text-xs text-emerald-600 font-bold py-1 flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> 모든 단어를 사용했습니다! [확인하기]를 누르세요.</span>';
-            } else {
-                state.unscrambleRemaining.forEach((word, idx) => {
-                    const block = document.createElement('button');
-                    block.className = "px-3.5 py-2 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-400 text-slate-700 font-semibold text-sm rounded-xl transition shadow-sm active:scale-95";
-                    block.innerText = word;
-                    block.onclick = () => {
-                        // Append to selected
-                        state.unscrambleRemaining.splice(idx, 1);
-                        state.unscrambleSelected.push(word);
-                        drawUnscramblePiles();
-                    };
-                    remainingBox.appendChild(block);
-                });
-            }
+            state.unscrambleRemaining.forEach((word, idx) => {
+                const b = document.createElement('button');
+                b.className = "px-2.5 py-1.5 bg-white border rounded-lg text-xs font-semibold hover:border-indigo-400 transition shadow-sm";
+                b.innerText = word;
+                b.onclick = () => { state.unscrambleRemaining.splice(idx,1); state.unscrambleSelected.push(word); drawUnscramblePiles(); };
+                rBox.appendChild(b);
+            });
         }
 
-        // Step 5: Full Writing Drill
         function renderStep5(parent) {
             document.getElementById('play-hint-btn').classList.remove('hidden');
             document.getElementById('play-speech-btn').classList.remove('hidden');
-            parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-xl space-y-6";
-
+            parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-md space-y-3";
             parent.innerHTML = `
-                <div class="text-center space-y-2">
-                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">주어진 우리말을 보고 전체 문장을 영어로 작성하세요</span>
-                    <h3 class="text-xl font-bold text-slate-800 leading-relaxed">"${state.activeItem.sentenceKo}"</h3>
-                </div>
-
-                <div class="w-full">
-                    <textarea id="step5-textarea" rows="3" autofocus placeholder="마침표(.)를 포함하여 정확하게 받아 적어 보세요." 
-                              class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 font-semibold text-lg leading-relaxed shadow-inner tracking-wide text-center"></textarea>
-                </div>
+                <div class="text-center"><h3 class="text-base font-bold text-slate-800">"${state.activeItem.sentenceKo}"</h3></div>
+                <textarea id="step5-textarea" rows="2" placeholder="전체 영어 문장 입력" class="w-full p-3 border-2 rounded-xl text-center font-semibold"></textarea>
             `;
         }
 
-        // Help Hint Handler
         function showHelpHint() {
             if (!state.activeItem) return;
-
-            let hintText = "";
-            if (state.activeDrillStep === 2) {
-                const en = state.activeItem.en;
-                hintText = `첫 두 글자는: "${en.substring(0, 2)}" 입니다. (총 ${en.length}글자)`;
-            } else if (state.activeDrillStep === 3) {
-                const blank = state.activeItem.targetBlank;
-                hintText = `스펠링 힌트: "${blank[0]} _ _ _ ${blank[blank.length-1]}" (총 ${blank.length}글자)`;
-            } else if (state.activeDrillStep === 5) {
-                const sen = state.activeItem.sentenceEn;
-                const words = sen.split(' ');
-                hintText = `첫 단어 힌트: "${words[0]}" ... (총 ${words.length}개 단어)`;
-            }
-
-            if (hintText) {
-                showToast(hintText);
-            }
+            if (state.activeDrillStep === 2) showToast(`두 글자 힌트: "${state.activeItem.en.substring(0,2)}..."`);
+            else if (state.activeDrillStep === 3) showToast(`빈칸 정답 글자수: 총 ${state.activeItem.targetBlank.length}글자`);
+            else if (state.activeDrillStep === 5) showToast(`첫 단어 시작: "${state.activeItem.sentenceEn.split(' ')[0]}..."`);
         }
 
-        // ================= FINISH AND RESULTS =================
         function finishDrill() {
             navigate('drill-result');
-            
-            const stepNames = ["", "1단계: 플래시 카드", "2단계: 단어 타이핑", "3단계: 문장 빈칸 채우기", "4단계: 문장 카드 결합", "5단계: 실전 영작문"];
-            document.getElementById('result-drill-name').innerText = stepNames[state.activeDrillStep];
-            
-            const unit = state.units.find(u => u.id === state.activeUnitId);
-            document.getElementById('result-unit-name').innerText = unit ? unit.title : "";
-
-            const total = state.playList.length;
-            document.getElementById('result-total-count').innerText = `${total} / ${total} 개 완료`;
-            
-            // Generate star ratings / score
-            const accuracy = Math.round((state.score / (total * 100)) * 100);
-            document.getElementById('result-score').innerText = `${accuracy}% 달성`;
+            const labels = ["", "1단계: 플래시 카드", "2단계: 단어 타이핑", "3단계: 빈칸 채우기", "4단계: 문장 카드 결합", "5단계: 실전 영작문"];
+            document.getElementById('result-drill-name').innerText = labels[state.activeDrillStep];
+            const u = state.units.find(x => x.id === state.activeUnitId);
+            document.getElementById('result-unit-name').innerText = u ? u.title : "";
+            document.getElementById('result-total-count').innerText = `${state.playList.length}문항 전체 완주`;
+            document.getElementById('result-score').innerText = `${Math.round((state.score/(state.playList.length*100))*100)}% 만족`;
         }
 
-
-        // ================= TEACHER DASHBOARD LOGIC =================
+        // ================= TEACHER DASHBOARD BACKEND LOGIC =================
         function renderTeacherUnits() {
-            const list = document.getElementById('teacher-unit-list');
-            list.innerHTML = '';
-
-            if (state.units.length === 0) {
-                list.innerHTML = `<div class="text-center text-xs text-slate-400 py-6">개설된 단원이 없습니다.</div>`;
-                return;
-            }
-
+            const list = document.getElementById('teacher-unit-list'); list.innerHTML = '';
+            if(state.units.length===0) { list.innerHTML='<div class="text-center text-xs py-4 text-slate-400">단원이 비어 있습니다.</div>'; return; }
             state.units.forEach(unit => {
                 const btn = document.createElement('button');
-                btn.className = `w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold transition flex justify-between items-center ${state.activeUnitId === unit.id ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600' : 'text-slate-600 hover:bg-slate-50'}`;
+                btn.className = `w-full text-left px-3 py-2.5 rounded-lg text-xs font-bold transition flex justify-between items-center ${state.activeUnitId === unit.id ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600':'text-slate-600'}`;
                 btn.onclick = () => selectTeacherUnit(unit.id);
-                btn.innerHTML = `
-                    <span class="truncate pr-2">${unit.title}</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] opacity-60"></i>
-                `;
+                btn.innerHTML = `<span class="truncate pr-2">${unit.title}</span><i class="fa-solid fa-chevron-right text-[9px] opacity-40"></i>`;
                 list.appendChild(btn);
             });
         }
 
         function createNewUnit() {
-            const titleInput = document.getElementById('teacher-new-unit-title');
-            const title = titleInput.value.trim();
-
-            if (!title) {
-                showToast("단원 제목을 입력해 주세요!");
-                return;
-            }
-
-            const newUnit = {
-                id: 'unit-' + Date.now(),
-                title: title,
-                words: [],
-                sentences: []
-            };
-
-            state.units.push(newUnit);
-            state.activeUnitId = newUnit.id;
-            titleInput.value = '';
-
-            saveAllData();
-            renderTeacherUnits();
-            selectTeacherUnit(newUnit.id);
-            showToast("새 단원이 생성되었습니다.");
+            const inp = document.getElementById('teacher-new-unit-title');
+            const t = inp.value.trim(); if(!t) return;
+            const newU = { id: 'unit-'+Date.now(), title: t, words: [], sentences: [] };
+            state.units.push(newU); state.activeUnitId = newU.id; inp.value = '';
+            saveAllData(); renderTeacherUnits(); selectTeacherUnit(newU.id); showToast("단원이 개설되었습니다.");
         }
 
         function selectTeacherUnit(unitId) {
-            state.activeUnitId = unitId;
-            renderTeacherUnits();
-
-            const unit = state.units.find(u => u.id === unitId);
-            if (!unit) return;
-
+            state.activeUnitId = unitId; renderTeacherUnits();
+            const unit = state.units.find(u => u.id === unitId); if(!unit) return;
             document.getElementById('teacher-no-unit-selected').classList.add('hidden');
             document.getElementById('teacher-workspace').classList.remove('hidden');
             document.getElementById('teacher-delete-unit-btn').classList.remove('hidden');
-            
             document.getElementById('teacher-active-unit-title').innerText = unit.title;
-
-            renderActiveUnitWords(unit);
-            renderActiveUnitSentences(unit);
+            renderActiveUnitWords(unit); renderActiveUnitSentences(unit);
         }
 
         function deleteCurrentUnit() {
-            if (!confirm("정말로 이 단원을 완벽하게 삭제하시겠습니까? 관련 데이터가 소멸됩니다.")) return;
-            
+            if(!confirm("이 단원을 데이터베이스에서 삭제하시겠습니까?")) return;
             state.units = state.units.filter(u => u.id !== state.activeUnitId);
             state.activeUnitId = state.units.length > 0 ? state.units[0].id : null;
-
-            saveAllData();
-            renderTeacherUnits();
-            
-            if (state.activeUnitId) {
-                selectTeacherUnit(state.activeUnitId);
-            } else {
+            saveAllData(); renderTeacherUnits();
+            if(state.activeUnitId) selectTeacherUnit(state.activeUnitId);
+            else {
                 document.getElementById('teacher-no-unit-selected').classList.remove('hidden');
                 document.getElementById('teacher-workspace').classList.add('hidden');
                 document.getElementById('teacher-delete-unit-btn').classList.add('hidden');
                 document.getElementById('teacher-active-unit-title').innerText = "단원을 선택해 주세요";
             }
-            showToast("단원이 삭제되었습니다.");
         }
 
-        // --- WORD MANAGER IN TEACHER VIEW ---
         function renderActiveUnitWords(unit) {
-            const tbody = document.getElementById('teacher-words-tbody');
-            tbody.innerHTML = '';
-
-            document.getElementById('teacher-word-count-badge').innerText = `${unit.words ? unit.words.length : 0}개 단어`;
-
-            if (!unit.words || unit.words.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-xs text-slate-400">등록된 단어가 없습니다. 위 폼에서 추가하세요.</td></tr>`;
-                return;
-            }
-
-            unit.words.forEach((word, idx) => {
-                const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-100 hover:bg-slate-50/50";
-                tr.innerHTML = `
-                    <td class="p-2.5 pl-4 font-bold text-slate-700">${word.en}</td>
-                    <td class="p-2.5 text-slate-500">${word.ko}</td>
-                    <td class="p-2.5 text-right pr-4">
-                        <button onclick="deleteWord(${idx})" class="text-rose-500 hover:text-rose-700 text-sm p-1"><i class="fa-solid fa-trash-can"></i></button>
-                    </td>
-                `;
+            const tbody = document.getElementById('teacher-words-tbody'); tbody.innerHTML = '';
+            document.getElementById('teacher-word-count-badge').innerText = `${unit.words?unit.words.length:0}개`;
+            if(!unit.words || unit.words.length===0) { tbody.innerHTML='<tr><td colspan="3" class="text-center text-xs p-4 text-slate-400">데이터 없음</td></tr>'; return; }
+            unit.words.forEach((w, i) => {
+                const tr = document.createElement('tr'); tr.className = "border-b";
+                tr.innerHTML = `<td class="p-2 font-bold">${w.en}</td><td class="p-2">${w.ko}</td><td class="p-2 text-right"><button onclick="deleteWord(${i})" class="text-rose-500 hover:text-rose-700 transition"><i class="fa-solid fa-trash-can"></i></button></td>`;
                 tbody.appendChild(tr);
             });
         }
 
         function addNewWordToUnit() {
-            const unit = state.units.find(u => u.id === state.activeUnitId);
-            if (!unit) return;
-
-            const enInput = document.getElementById('teacher-new-word-en');
-            const koInput = document.getElementById('teacher-new-word-ko');
-
-            const en = enInput.value.trim();
-            const ko = koInput.value.trim();
-
-            if (!en || !ko) {
-                showToast("영어 단어와 우리말 뜻을 모두 입력해 주세요.");
-                return;
-            }
-
-            if (!unit.words) unit.words = [];
-            unit.words.push({ en, ko });
-
-            saveAllData();
-            renderActiveUnitWords(unit);
-
-            enInput.value = '';
-            koInput.value = '';
-            enInput.focus();
-            showToast("단어가 등록되었습니다.");
+            const u = state.units.find(x => x.id === state.activeUnitId); if(!u) return;
+            const enI = document.getElementById('teacher-new-word-en');
+            const koI = document.getElementById('teacher-new-word-ko');
+            if(!enI.value.trim() || !koI.value.trim()) return;
+            if(!u.words) u.words = [];
+            u.words.push({ en: enI.value.trim(), ko: koI.value.trim() });
+            saveAllData(); renderActiveUnitWords(u); enI.value=''; koI.value=''; enI.focus();
         }
 
-        function deleteWord(idx) {
-            const unit = state.units.find(u => u.id === state.activeUnitId);
-            if (!unit) return;
-
-            unit.words.splice(idx, 1);
-            saveAllData();
-            renderActiveUnitWords(unit);
-            showToast("단어가 삭제되었습니다.");
+        function deleteWord(i) {
+            const u = state.units.find(x => x.id === state.activeUnitId); if(!u) return;
+            u.words.splice(i,1); saveAllData(); renderActiveUnitWords(u);
         }
 
-        // --- SENTENCE MANAGER IN TEACHER VIEW ---
         function renderActiveUnitSentences(unit) {
-            const tbody = document.getElementById('teacher-sentences-tbody');
-            tbody.innerHTML = '';
-
-            document.getElementById('teacher-sentence-count-badge').innerText = `${unit.sentences ? unit.sentences.length : 0}개 문장`;
-
-            if (!unit.sentences || unit.sentences.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-xs text-slate-400">등록된 핵심 예문이 없습니다. 위 폼에서 추가하세요.</td></tr>`;
-                return;
-            }
-
-            unit.sentences.forEach((sen, idx) => {
-                const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-100 hover:bg-slate-50/50";
-                tr.innerHTML = `
-                    <td class="p-2.5 pl-4 font-bold text-slate-700">${sen.en}</td>
-                    <td class="p-2.5 text-slate-500">${sen.ko} <span class="bg-indigo-50 text-indigo-700 text-[10px] px-1.5 py-0.5 rounded font-bold ml-1">(${sen.blank})</span></td>
-                    <td class="p-2.5 text-right pr-4">
-                        <button onclick="deleteSentence(${idx})" class="text-rose-500 hover:text-rose-700 text-sm p-1"><i class="fa-solid fa-trash-can"></i></button>
-                    </td>
-                `;
+            const tbody = document.getElementById('teacher-sentences-tbody'); tbody.innerHTML = '';
+            document.getElementById('teacher-sentence-count-badge').innerText = `${unit.sentences?unit.sentences.length:0}개`;
+            if(!unit.sentences || unit.sentences.length===0) { tbody.innerHTML='<tr><td colspan="3" class="text-center text-xs p-4 text-slate-400">데이터 없음</td></tr>'; return; }
+            unit.sentences.forEach((s, i) => {
+                const tr = document.createElement('tr'); tr.className = "border-b";
+                tr.innerHTML = `<td class="p-2 font-semibold text-xs">${s.en}</td><td class="p-2 text-xs">${s.ko} (${s.blank})</td><td class="p-2 text-right"><button onclick="deleteSentence(${i})" class="text-rose-500 hover:text-rose-700 transition"><i class="fa-solid fa-trash-can"></i></button></td>`;
                 tbody.appendChild(tr);
             });
         }
 
         function addNewSentenceToUnit() {
-            const unit = state.units.find(u => u.id === state.activeUnitId);
-            if (!unit) return;
-
-            const enInput = document.getElementById('teacher-new-sentence-en');
-            const koInput = document.getElementById('teacher-new-sentence-ko');
-            const blankInput = document.getElementById('teacher-new-sentence-blank');
-
-            const en = enInput.value.trim();
-            const ko = koInput.value.trim();
-            const blank = blankInput.value.trim();
-
-            if (!en || !ko || !blank) {
-                showToast("문장 정보와 빈칸 단어(타겟)를 모두 적어주세요.");
-                return;
-            }
-
-            // Simple validation to ensure blank word is inside original sentence
-            if (!en.toLowerCase().includes(blank.toLowerCase())) {
-                showToast("오류: 빈칸 단어가 등록할 영어 예문 철자에 부합하지 않습니다.");
-                return;
-            }
-
-            if (!unit.sentences) unit.sentences = [];
-            unit.sentences.push({ en, ko, blank });
-
-            saveAllData();
-            renderActiveUnitSentences(unit);
-
-            enInput.value = '';
-            koInput.value = '';
-            blankInput.value = '';
-            enInput.focus();
-            showToast("핵심 문장이 추가되었습니다.");
+            const u = state.units.find(x => x.id === state.activeUnitId); if(!u) return;
+            const enI = document.getElementById('teacher-new-sentence-en').value.trim();
+            const koI = document.getElementById('teacher-new-sentence-ko').value.trim();
+            const blI = document.getElementById('teacher-new-sentence-blank').value.trim();
+            if(!enI || !koI || !blI) return;
+            if(!u.sentences) u.sentences = [];
+            u.sentences.push({ en: enI, ko: koI, blank: blI });
+            saveAllData(); renderActiveUnitSentences(u);
+            document.getElementById('teacher-new-sentence-en').value='';
+            document.getElementById('teacher-new-sentence-ko').value='';
+            document.getElementById('teacher-new-sentence-blank').value='';
         }
 
-        function deleteSentence(idx) {
-            const unit = state.units.find(u => u.id === state.activeUnitId);
-            if (!unit) return;
-
-            unit.sentences.splice(idx, 1);
-            saveAllData();
-            renderActiveUnitSentences(unit);
-            showToast("문장이 제거되었습니다.");
+        function deleteSentence(i) {
+            const u = state.units.find(x => x.id === state.activeUnitId); if(!u) return;
+            u.sentences.splice(i,1); saveAllData(); renderActiveUnitSentences(u);
         }
 
-
-        // ================= IMPORT / EXPORT UTILITIES =================
+        // ================= IMPORT / EXPORT METHODS =================
         function triggerExport() {
-            const dataStr = JSON.stringify(state.units, null, 2);
-            document.getElementById('export-textarea').value = dataStr;
+            document.getElementById('export-textarea').value = JSON.stringify(state.units, null, 2);
             document.getElementById('export-modal').classList.remove('hidden');
         }
-
-        function closeExportModal() {
-            document.getElementById('export-modal').classList.add('hidden');
-        }
-
+        function closeExportModal() { document.getElementById('export-modal').classList.add('hidden'); }
         function copyExportedText() {
-            const textarea = document.getElementById('export-textarea');
-            textarea.select();
-            document.execCommand('copy');
-            showToast("단원 학습 데이터가 클립보드에 성공적으로 복사되었습니다!");
+            document.getElementById('export-textarea').select(); document.execCommand('copy'); showToast("클립보드에 복사 완료!");
         }
-
         function downloadJsonFile() {
-            const dataStr = document.getElementById('export-textarea').value;
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = `edudrill_lessons_${new Date().toISOString().slice(0,10)}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
+            const blob = new Blob([document.getElementById('export-textarea').value], {type: "application/json"});
+            const url = URL.createObjectURL(blob); const a = document.createElement('a');
+            a.href = url; a.download = `edudrill_lessons_${new Date().toISOString().slice(0,10)}.json`; a.click();
         }
-
-        // File Import logic
         function importDataFromFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
+            const file = event.target.files[0]; if(!file) return;
+            const r = new FileReader();
+            r.onload = function(e) {
                 try {
-                    const importedData = JSON.parse(e.target.result);
-                    
-                    // Validate structure lightly
-                    if (Array.isArray(importedData)) {
-                        state.units = importedData;
-                        saveAllData();
-                        loadAllData();
-                        showToast("성공: 영어 단원 데이터를 정상적으로 가져왔습니다!");
-                    } else {
-                        showToast("실패: 올바른 형식의 단원 JSON 구조가 아닙니다.");
-                    }
-                } catch (err) {
-                    showToast("실패: JSON 파일을 읽는 도중 문법 오류가 발생했습니다.");
-                }
+                    const parsed = JSON.parse(e.target.result);
+                    if(Array.isArray(parsed)) { state.units = parsed; saveAllData(); loadAllData(); showToast("데이터 병합 로드 성공!"); }
+                } catch(err) { showToast("문법 에러 파일입니다."); }
             };
-            reader.readAsText(file);
-            // Clear input
-            event.target.value = '';
+            r.readAsText(file); event.target.value = '';
         }
     </script>
 </body>
