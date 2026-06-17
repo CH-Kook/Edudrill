@@ -116,7 +116,6 @@
                         <div class="text-xs text-slate-400 font-bold">현재 점수</div>
                         <div id="quiz-score-text" class="text-2xl font-black text-indigo-600">0</div>
                     </div>
-                    <!-- -->
                     <!-- Streak Combo badge -->
                     <div id="quiz-streak-badge" class="hidden flex items-center bg-orange-50 text-orange-600 px-2.5 py-1 rounded-full text-xs font-bold border border-orange-200 animate-pulse">
                         <i class="fa-solid fa-fire mr-1"></i> <span id="quiz-streak-text">0 연속</span>
@@ -131,7 +130,7 @@
                     <i class="fa-solid fa-clock text-orange-500 text-xl animate-spin" style="animation-duration: 3s;"></i>
                     <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden border border-slate-200 relative">
                         <div id="quiz-timer-bar" class="bg-gradient-to-r from-orange-500 to-red-500 h-full transition-all duration-200" style="width: 100%"></div>
-                        <span id="quiz-timer-text" class="absolute inset-0 flex items-center justify-center text-[10px] font-extrabold text-slate-700">30초</span>
+                        <span id="quiz-timer-text" class="absolute inset-0 flex items-center justify-center text-[10px] font-extrabold text-slate-700">20초</span>
                     </div>
                 </div>
             </div>
@@ -873,7 +872,7 @@
             quizState.globalSentences = totalSentencesGlobal.length > 0 ? totalSentencesGlobal : [{en:"dummy sentence", ko:"더미", blank:"dummy"}];
 
             quizState.score = 0;
-            quizState.timeLeft = 30;
+            quizState.timeLeft = 20; // 20초로 변경 시작
             quizState.streak = 0;
             document.getElementById('quiz-score-text').innerText = "0";
             document.getElementById('quiz-streak-badge').classList.add('hidden');
@@ -899,14 +898,14 @@
             const bar = document.getElementById('quiz-timer-bar');
             const txt = document.getElementById('quiz-timer-text');
             
-            let pct = (quizState.timeLeft / 30) * 100;
+            let pct = (quizState.timeLeft / 20) * 100; // 최대 20초 기준으로 바 너비 계산
             if (pct > 100) pct = 100;
             if (pct < 0) pct = 0;
 
             bar.style.width = `${pct}%`;
             txt.innerText = `${quizState.timeLeft}초 남음`;
 
-            if (quizState.timeLeft <= 8) {
+            if (quizState.timeLeft <= 6) { // 20초 제한이므로 경고 시점을 6초 이하로 소폭 조정
                 bar.className = "bg-gradient-to-r from-red-500 to-rose-600 h-full animate-pulse";
             } else {
                 bar.className = "bg-gradient-to-r from-orange-500 to-red-500 h-full";
@@ -1017,11 +1016,11 @@
                 const pointsGained = 10 * currentMultiplier;
 
                 quizState.score += pointsGained;
-                quizState.timeLeft += 5;
+                quizState.timeLeft += 2; // 정답 시 +2초로 밸런스 조정
                 
-                // Enforce maximum time cap at 30 seconds
-                if (quizState.timeLeft > 30) {
-                    quizState.timeLeft = 30;
+                // Enforce maximum time cap at 20 seconds
+                if (quizState.timeLeft > 20) {
+                    quizState.timeLeft = 20; // 최대 20초 고정
                 }
                 
                 document.getElementById('quiz-score-text').innerText = quizState.score;
@@ -1039,7 +1038,7 @@
                     showToast(`🔥 ${quizState.streak}콤보 달성! 2배 점수 획득 (+${pointsGained}점)`);
                 } else {
                     multBadge.classList.add('hidden');
-                    showToast("정답! 시간 +5초 ⏱️");
+                    showToast("정답! 시간 +2초 ⏱️");
                 }
                 
                 btn.className = "quiz-choice-btn p-4 bg-emerald-500 border-2 border-emerald-600 font-bold text-left rounded-2xl text-white transition flex items-center justify-between";
@@ -1049,7 +1048,7 @@
                 document.getElementById('quiz-streak-badge').classList.add('hidden');
                 document.getElementById('quiz-multiplier-badge').classList.add('hidden');
                 
-                quizState.timeLeft -= 5;
+                quizState.timeLeft -= 5; // 틀렸을 때의 패널티는 -5초로 강력하게 유지하여 스릴 극대화
                 if (quizState.timeLeft < 0) quizState.timeLeft = 0;
                 showToast("❌ 오답! 콤보가 리셋되었습니다! 시간 -5초");
                 btn.className = "quiz-choice-btn p-4 bg-rose-500 border-2 border-rose-600 font-bold text-left rounded-2xl text-white transition flex items-center justify-between";
