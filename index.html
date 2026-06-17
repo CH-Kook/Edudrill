@@ -636,6 +636,19 @@
             globalSentences: []
         };
 
+        // 키보드 기본 작은따옴표(')와 스마트폰/복사 텍스트의 곡선형 스마트 어퍼스트로피(’) 불일치 해결용 텍스트 정제 함수
+        function cleanText(str, removePunctuation = true) {
+            if (!str) return "";
+            // 1. 모든 형태의 변형 어퍼스트로피/따옴표 기호를 기본 ASCII 홑따옴표(')로 통일
+            let cleaned = str.trim().toLowerCase().replace(/[’‘’`´]/g, "'");
+            // 2. 필요 시 온점, 쉼표, 물음표, 느낌표 제거
+            if (removePunctuation) {
+                cleaned = cleaned.replace(/[.,?!]/g, "");
+            }
+            // 3. 연속된 중복 띄어쓰기 공백 제거 및 양끝 정리
+            return cleaned.replace(/\s+/g, " ").trim();
+        }
+
         window.onload = function() {
             loadAllData();
             navigate('home');
@@ -1073,7 +1086,14 @@
             if (state.activeDrillStep === 1) setTimeout(speakActiveItem, 300);
         }
 
-        function skipItem() { state.playIndex++; loadPlayItem(); }
+        function skipItem() {
+            // 학생들이 완벽하게 외우거나 정답을 맞추지 못해 넘어간 항목은 학습 리스트의 맨 뒤로 다시 보냅니다.
+            state.playList.push({...state.activeItem});
+            state.playIndex++;
+            loadPlayItem();
+            showToast("다시 공부할 수 있도록 이 카드를 맨 뒤로 보냈습니다! 🔁");
+        }
+
         function dismissFeedback() {
             document.getElementById('play-feedback-banner').className = "absolute inset-x-0 bottom-0 py-3 px-6 rounded-b-3xl text-center font-bold text-white transition-all duration-300 transform translate-y-full opacity-0 z-10 flex justify-between items-center";
         }
@@ -1093,24 +1113,26 @@
                 state.score += 100;
                 showFeedbackBanner(true, `단어 암기 체크 완료: ${state.activeItem.en}`);
             } else if (state.activeDrillStep === 2) {
-                const val = document.getElementById('step2-input').value.trim().toLowerCase();
-                if (val === state.activeItem.en.trim().toLowerCase()) {
+                const val = cleanText(document.getElementById('step2-input').value, false);
+                const correct = cleanText(state.activeItem.en, false);
+                if (val === correct) {
                     state.score += 100; speakActiveItem(); showFeedbackBanner(true, `정답입니다! [ ${state.activeItem.en} ]`);
                 } else { showFeedbackBanner(false, `오답입니다. 정답은 [ ${state.activeItem.en} ]`); }
             } else if (state.activeDrillStep === 3) {
-                const val = document.getElementById('step3-input').value.trim().toLowerCase();
-                if (val === state.activeItem.targetBlank.trim().toLowerCase()) {
+                const val = cleanText(document.getElementById('step3-input').value, false);
+                const correct = cleanText(state.activeItem.targetBlank, false);
+                if (val === correct) {
                     state.score += 100; speakActiveItem(); showFeedbackBanner(true, `정답입니다!`);
                 } else { showFeedbackBanner(false, `오답입니다. 빈칸 단어는 [ ${state.activeItem.targetBlank} ]`); }
             } else if (state.activeDrillStep === 4) {
-                const userString = state.unscrambleSelected.join(' ');
-                const correctString = state.activeItem.sentenceEn.replace(/[.,?!]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+                const userString = cleanText(state.unscrambleSelected.join(' '), true);
+                const correctString = cleanText(state.activeItem.sentenceEn, true);
                 if (userString === correctString) {
                     state.score += 100; speakActiveItem(); showFeedbackBanner(true, `완벽한 문장 결합입니다!`);
                 } else { showFeedbackBanner(false, `순서가 틀렸습니다. 정답: "${state.activeItem.sentenceEn}"`); }
             } else if (state.activeDrillStep === 5) {
-                const val = document.getElementById('step5-textarea').value.trim().toLowerCase().replace(/[.,?!]/g, "");
-                const correct = state.activeItem.sentenceEn.trim().toLowerCase().replace(/[.,?!]/g, "");
+                const val = cleanText(document.getElementById('step5-textarea').value, true);
+                const correct = cleanText(state.activeItem.sentenceEn, true);
                 if (val === correct) {
                     state.score += 100; speakActiveItem(); showFeedbackBanner(true, `우수한 통영작 성공!`);
                 } else { showFeedbackBanner(false, `오답입니다. 정답: "${state.activeItem.sentenceEn}"`); }
