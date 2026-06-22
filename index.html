@@ -58,7 +58,7 @@
                 <div class="relative z-10 max-w-xl">
                     <span class="bg-white text-orange-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">스피드 게임 모드</span>
                     <h2 class="text-2xl md:text-3xl font-extrabold mt-2 leading-tight">💥 30초 서바이벌 스피드 퀴즈!</h2>
-                    <p class="text-amber-50 mt-2 text-sm">원하는 단원을 조합해 박진감 넘치는 퀴즈에 도전하세요! 맞추면 +5초, 틀리면 -5초! 귀로 듣고 머리로 맞추는 스피드 서바이벌!</p>
+                    <p class="text-amber-50 mt-2 text-sm">원하는 단원을 조합해 박진감 넘치는 퀴즈에 도전하세요! 맞추면 +2초, 틀리면 -5초! 귀로 듣고 머리로 맞추는 스피드 서바이벌!</p>
                 </div>
                 <button onclick="openSpeedQuizSetup()" class="relative z-10 px-6 py-3 bg-white text-orange-600 font-black rounded-2xl shadow-md hover:bg-amber-50 transition transform active:scale-95 flex items-center gap-2 text-base shrink-0 whitespace-nowrap">
                     <i class="fa-solid fa-bolt-lightning animate-pulse"></i> 퀴즈 시작하기
@@ -614,6 +614,9 @@
           }
         ];
 
+        // 🚀 자동 데이터 버전 동기화 키 (배포할 때마다 변경하여 브라우저의 옛날 캐시를 강제 삭제함)
+        const DATA_VERSION = "2026-06-22_v1.0.6";
+
         // ================= APP STATE =================
         let state = {
             units: [],
@@ -640,7 +643,8 @@
             timer: null,
             timeLeft: 30,
             score: 0,
-            streak: 0,            globalWords: [],
+            streak: 0,
+            globalWords: [],
             globalSentences: []
         };
 
@@ -666,16 +670,21 @@
         };
 
         function loadAllData() {
+            const savedVersion = localStorage.getItem('edudrill_version');
             const data = localStorage.getItem('edudrill_lessons');
-            if (data) {
+
+            // 🌟 버전이 다르거나 저장된 데이터가 아예 없다면 옛날 캐시를 버리고 무조건 새 defaultLessons 로 동기화!
+            if (savedVersion !== DATA_VERSION || !data) {
+                state.units = JSON.parse(JSON.stringify(defaultLessons));
+                saveAllData();
+                localStorage.setItem('edudrill_version', DATA_VERSION);
+            } else {
                 try { 
                     state.units = JSON.parse(data); 
                 } catch (e) { 
                     state.units = JSON.parse(JSON.stringify(defaultLessons)); 
+                    saveAllData();
                 }
-            } else {
-                state.units = JSON.parse(JSON.stringify(defaultLessons));
-                saveAllData();
             }
             renderHomeUnits();
             renderTeacherUnits();
@@ -683,11 +692,13 @@
 
         function saveAllData() {
             localStorage.setItem('edudrill_lessons', JSON.stringify(state.units));
+            localStorage.setItem('edudrill_version', DATA_VERSION); // 저장할 때도 현재 동기화 버전을 함께 보관
         }
 
         function resetToSystemDefault() {
             if (confirm("🚨 주의: 지금까지 로컬에서 수정한 모든 데이터가 삭제되고, 제공된 기본 1~6과 데이터로 초기화됩니다. 진행하시겠습니까?")) {
                 state.units = JSON.parse(JSON.stringify(defaultLessons));
+                localStorage.setItem('edudrill_version', DATA_VERSION);
                 saveAllData();
                 loadAllData();
                 showToast("기본 데이터로 전체 초기화되었습니다.");
@@ -872,7 +883,7 @@
             quizState.globalSentences = totalSentencesGlobal.length > 0 ? totalSentencesGlobal : [{en:"dummy sentence", ko:"더미", blank:"dummy"}];
 
             quizState.score = 0;
-            quizState.timeLeft = 20; // 20초로 변경 시작
+            quizState.timeLeft = 20; // 20초 제한 시작
             quizState.streak = 0;
             document.getElementById('quiz-score-text').innerText = "0";
             document.getElementById('quiz-streak-badge').classList.add('hidden');
@@ -898,14 +909,14 @@
             const bar = document.getElementById('quiz-timer-bar');
             const txt = document.getElementById('quiz-timer-text');
             
-            let pct = (quizState.timeLeft / 20) * 100; // 최대 20초 기준으로 바 너비 계산
+            let pct = (quizState.timeLeft / 20) * 100; // 최대 20초 기준 게이지 계산
             if (pct > 100) pct = 100;
             if (pct < 0) pct = 0;
 
             bar.style.width = `${pct}%`;
             txt.innerText = `${quizState.timeLeft}초 남음`;
 
-            if (quizState.timeLeft <= 6) { // 20초 제한이므로 경고 시점을 6초 이하로 소폭 조정
+            if (quizState.timeLeft <= 6) { 
                 bar.className = "bg-gradient-to-r from-red-500 to-rose-600 h-full animate-pulse";
             } else {
                 bar.className = "bg-gradient-to-r from-orange-500 to-red-500 h-full";
@@ -1016,16 +1027,16 @@
                 const pointsGained = 10 * currentMultiplier;
 
                 quizState.score += pointsGained;
-                quizState.timeLeft += 2; // 정답 시 +2초로 밸런스 조정
+                quizState.timeLeft += 2; // 맞추면 2초 증가
                 
-                // Enforce maximum time cap at 20 seconds
+                // 최대 시간 20초 캡 고정
                 if (quizState.timeLeft > 20) {
-                    quizState.timeLeft = 20; // 최대 20초 고정
+                    quizState.timeLeft = 20; 
                 }
                 
                 document.getElementById('quiz-score-text').innerText = quizState.score;
                 
-                // Update Streak & Multiplier UI
+                // 콤보 및 배율 UI 업데이트
                 const streakBadge = document.getElementById('quiz-streak-badge');
                 const streakTxt = document.getElementById('quiz-streak-text');
                 const multBadge = document.getElementById('quiz-multiplier-badge');
@@ -1043,14 +1054,14 @@
                 
                 btn.className = "quiz-choice-btn p-4 bg-emerald-500 border-2 border-emerald-600 font-bold text-left rounded-2xl text-white transition flex items-center justify-between";
             } else {
-                // Break streak & multiplier instantly
+                // 틀릴 시 콤보 리셋 및 시간 패널티
                 quizState.streak = 0;
                 document.getElementById('quiz-streak-badge').classList.add('hidden');
                 document.getElementById('quiz-multiplier-badge').classList.add('hidden');
                 
-                quizState.timeLeft -= 5; // 틀렸을 때의 패널티는 -5초로 강력하게 유지하여 스릴 극대화
+                quizState.timeLeft -= 5; // 오답 시 5초 감점
                 if (quizState.timeLeft < 0) quizState.timeLeft = 0;
-                showToast("❌ 오답! 콤보가 리셋되었습니다! 시간 -5초");
+                showToast("❌ 오답! 콤보 리셋! 시간 -5초");
                 btn.className = "quiz-choice-btn p-4 bg-rose-500 border-2 border-rose-600 font-bold text-left rounded-2xl text-white transition flex items-center justify-between";
             }
 
@@ -1130,11 +1141,11 @@
         }
 
         function skipItem() {
-            // 학생들이 완벽하게 외우거나 정답을 맞추지 못해 넘어간 항목은 학습 리스트의 맨 뒤로 다시 보냅니다.
+            // 학생들이 확실하게 암기하지 못하거나 실패해 '넘어가기'를 한 항목은 학습 대기큐 맨 뒤로 회수 보장
             state.playList.push({...state.activeItem});
             state.playIndex++;
             loadPlayItem();
-            showToast("다시 공부할 수 있도록 이 카드를 맨 뒤로 보냈습니다! 🔁");
+            showToast("다시 트레이닝할 수 있도록 해당 카드를 맨 뒤로 보냈습니다! 🔁");
         }
 
         function dismissFeedback() {
@@ -1235,6 +1246,7 @@
             document.getElementById('step3-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkOrNextItem(); });
         }
 
+        // 문장 조립
         function renderStep4(parent) {
             document.getElementById('play-speech-btn').classList.remove('hidden');
             parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-xl space-y-4";
@@ -1382,6 +1394,7 @@
             });
         }
 
+        // 문장 추가
         function addNewSentenceToUnit() {
             const u = state.units.find(x => x.id === state.activeUnitId); if(!u) return;
             const enI = document.getElementById('teacher-new-sentence-en').value.trim();
