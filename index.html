@@ -848,10 +848,19 @@
             return n;
         }
 
+        // 무한 모드(2·3단계)용: 직전 목적지를 피해 건물 중 하나를 무작위로 선택
+        function pickRandomTarget() {
+            const keys = Object.keys(dirMap.buildings);
+            let candidates = keys.filter(k => k !== dirState.target);
+            if (candidates.length === 0) candidates = keys;
+            return candidates[Math.floor(Math.random() * candidates.length)];
+        }
+
         function startDirStage(stage) {
             dirState.stage = stage; dirState.round = 0;
+            dirState.target = null;
             if (stage === 0) { dirState.deckMode = 'words'; dirState.deckIndex = 0; dirState.deckFlipped = false; }
-            else { dirState.scenarios = dirScenarios[stage]; }
+            else if (stage === 1) { dirState.scenarios = dirScenarios[stage]; }
             navigate('directions-play');
             loadDirRound();
         }
@@ -860,8 +869,16 @@
             const labels = { 0: "0단계 · 표현 배우기", 1: "1단계 · 길 따라가기", 2: "2단계 · 블록으로 안내하기", 3: "3단계 · 길 안내 영작" };
             document.getElementById('dir-stage-badge').innerText = labels[dirState.stage];
             if (dirState.stage === 0) { document.getElementById('dir-map-wrap').classList.add('hidden'); renderDirLearn(); return; }
-            const sc = dirState.scenarios[dirState.round];
-            document.getElementById('dir-round-text').innerText = `${dirState.round + 1} / ${dirState.scenarios.length}`;
+
+            let sc;
+            if (dirState.stage === 2 || dirState.stage === 3) {
+                // 무한 모드: 매 라운드 새 목적지를 무작위로 뽑고, 진행 표시는 누적 횟수
+                sc = { target: pickRandomTarget() };
+                document.getElementById('dir-round-text').innerText = `${dirState.round + 1}번째 도전`;
+            } else {
+                sc = dirState.scenarios[dirState.round];
+                document.getElementById('dir-round-text').innerText = `${dirState.round + 1} / ${dirState.scenarios.length}`;
+            }
             dirState.target = sc.target;
             dirState.start = { x: 2, y: 2, facing: 'up' };
             dirState.pos = { ...dirState.start };
@@ -1047,7 +1064,12 @@
         }
         function dirNextRound() {
             dirState.round++;
-            if (dirState.round >= dirState.scenarios.length) { showToast("🏆 이 단계를 완주했어요! 잘했어요!"); navigate('directions-menu'); return; }
+            // 2·3단계는 무한 모드 — 끝나지 않고 새 목적지로 계속 진행
+            if (dirState.stage === 1 && dirState.round >= dirState.scenarios.length) {
+                showToast("🏆 이 단계를 완주했어요! 잘했어요!");
+                navigate('directions-menu');
+                return;
+            }
             loadDirRound();
         }
 
