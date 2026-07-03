@@ -74,6 +74,27 @@
                 </div>
             </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-3xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between gap-3">
+                    <div>
+                        <span class="bg-white text-blue-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">듣기 집중 훈련</span>
+                        <h2 class="text-xl md:text-2xl font-extrabold mt-2">🎧 문장 받아쓰기</h2>
+                        <p class="text-sky-50 mt-1 text-sm">원어민 발음을 듣고 문장을 통째로 받아 적어요. 보기 없음! 다시 듣기는 2회뿐!</p>
+                    </div>
+                    <button onclick="openDictationSetup()" class="self-start px-5 py-2.5 bg-white text-blue-600 font-black rounded-2xl shadow-md hover:bg-sky-50 transition active:scale-95 text-sm"><i class="fa-solid fa-headphones"></i> 받아쓰기 시작</button>
+                    <div class="absolute right-2 bottom-0 opacity-10 text-[100px] pointer-events-none hidden lg:block"><i class="fa-solid fa-ear-listen"></i></div>
+                </div>
+                <div class="bg-gradient-to-r from-violet-500 to-purple-700 text-white rounded-3xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between gap-3">
+                    <div>
+                        <span class="bg-white text-purple-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">전 범위 최종 관문</span>
+                        <h2 class="text-xl md:text-2xl font-extrabold mt-2">👑 종합 승급 시험</h2>
+                        <p class="text-violet-100 mt-1 text-sm">전 단원 혼합 15문제, 전부 직접 타이핑! 목숨 3개로 골드 등급에 도전하세요.</p>
+                    </div>
+                    <button onclick="startExam()" class="self-start px-5 py-2.5 bg-white text-purple-700 font-black rounded-2xl shadow-md hover:bg-violet-50 transition active:scale-95 text-sm"><i class="fa-solid fa-crown"></i> 시험 도전하기</button>
+                    <div class="absolute right-2 bottom-0 opacity-10 text-[100px] pointer-events-none hidden lg:block"><i class="fa-solid fa-medal"></i></div>
+                </div>
+            </div>
+
             <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -196,6 +217,100 @@
             </div>
             <div id="dir-prompt" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 text-center"></div>
             <div id="dir-controls" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100"></div>
+        </section>
+
+        <!-- ================= DICTATION SETUP MODAL ================= -->
+        <div id="dict-setup-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-xl space-y-5">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-extrabold text-slate-900 text-xl flex items-center gap-2"><i class="fa-solid fa-headphones text-blue-500"></i> 받아쓰기 범위 설정</h3>
+                    <button onclick="closeDictationSetup()" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <p class="text-sm text-slate-500">받아쓰기에 포함할 범위를 체크해 주세요. 문장이 등록된 단원만 표시됩니다.</p>
+                <div id="dict-unit-checkboxes" class="space-y-2 max-h-48 overflow-y-auto p-1"></div>
+                <div class="pt-2">
+                    <button onclick="startDictationGame()" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold rounded-2xl hover:from-sky-600 hover:to-blue-700 transition shadow-md flex items-center justify-center gap-2 text-base"><i class="fa-solid fa-play"></i> 받아쓰기 시작!</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= DICTATION PLAY ================= -->
+        <section id="view-dictation-play" class="view-section hidden max-w-xl mx-auto space-y-4">
+            <div class="flex justify-between items-center">
+                <button onclick="navigate('home')" class="text-slate-500 hover:text-slate-800 transition text-sm flex items-center gap-1"><i class="fa-solid fa-circle-chevron-left text-xl"></i> 나가기</button>
+                <span class="text-xs px-2.5 py-1 rounded-full font-bold bg-sky-100 text-sky-700">🎧 문장 받아쓰기</span>
+                <span class="text-sm font-semibold text-slate-500">진행 <span id="dict-progress-text" class="text-blue-600">0/0</span></span>
+            </div>
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 space-y-5 text-center">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-sky-50 text-blue-500 text-4xl"><i class="fa-solid fa-volume-high"></i></div>
+                <p class="text-sm text-slate-500 font-semibold">잘 듣고 들린 문장을 그대로 입력하세요.</p>
+                <div class="flex justify-center items-center gap-1.5">
+                    <span class="text-xs text-slate-400 font-bold mr-1"><i class="fa-solid fa-gauge-high"></i> 속도</span>
+                    <button data-rate="slow" onclick="setTtsRate('slow')" class="tts-rate-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 transition">🐢 느리게</button>
+                    <button data-rate="normal" onclick="setTtsRate('normal')" class="tts-rate-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white transition">보통</button>
+                    <button data-rate="fast" onclick="setTtsRate('fast')" class="tts-rate-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 transition">🐇 빠르게</button>
+                </div>
+                <div class="flex justify-center gap-2">
+                    <button id="dict-replay-btn" onclick="dictReplay()" class="px-4 py-2 bg-sky-50 text-blue-700 rounded-xl font-bold text-sm hover:bg-sky-100 transition"><i class="fa-solid fa-arrows-rotate"></i> 다시 듣기 (<span id="dict-replay-count">2</span>회 남음)</button>
+                    <button onclick="dictHint()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition"><i class="fa-solid fa-lightbulb text-amber-500"></i> 뜻 보기</button>
+                </div>
+                <input type="text" id="dict-input" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" lang="en" placeholder="들린 문장 전체 입력" class="w-full text-center text-lg font-bold py-3 border-2 rounded-xl focus:outline-none focus:border-blue-500">
+                <div id="dict-feedback" class="hidden rounded-xl p-3 text-sm font-bold"></div>
+                <button id="dict-check-btn" onclick="checkDictAnswer()" class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition"><span id="dict-check-label">확인하기</span></button>
+            </div>
+        </section>
+
+        <!-- ================= DICTATION RESULT ================= -->
+        <section id="view-dict-result" class="view-section hidden max-w-md mx-auto">
+            <div class="bg-white rounded-3xl p-8 shadow-xl border border-slate-100 text-center space-y-6">
+                <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-sky-50 text-blue-500 text-5xl animate-bounce"><i class="fa-solid fa-headphones"></i></div>
+                <div><h2 class="text-2xl font-black text-slate-900">받아쓰기 완료!</h2><p class="text-sm text-slate-500 mt-1">듣기 훈련을 끝까지 마쳤어요.</p></div>
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                    <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">받아쓰기 성적</div>
+                    <div id="dict-final-score" class="text-4xl font-black text-blue-600 mt-1">0 / 0</div>
+                    <div id="dict-final-pct" class="text-sm font-bold text-slate-500 mt-1">정답률 0%</div>
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <button onclick="openDictationSetup()" class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-md">한 번 더 도전하기</button>
+                    <button onclick="navigate('home')" class="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition">학습 홈으로 이동</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= EXAM (승급 시험) PLAY ================= -->
+        <section id="view-exam-play" class="view-section hidden max-w-xl mx-auto space-y-4">
+            <div class="flex justify-between items-center bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-100">
+                <button onclick="terminateExam()" class="text-xs text-rose-500 font-bold hover:underline"><i class="fa-solid fa-circle-stop"></i> 기권</button>
+                <span id="exam-lives" class="text-xl tracking-widest">❤️❤️❤️</span>
+                <span class="text-sm font-semibold text-slate-500">문제 <span id="exam-progress-text" class="text-purple-600 font-black">1 / 15</span></span>
+            </div>
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-slate-100 space-y-5 text-center">
+                <div id="exam-type-badge" class="inline-block px-3 py-1 bg-violet-100 rounded-full text-xs font-bold text-violet-700">유형</div>
+                <div id="exam-question" class="text-xl md:text-2xl font-black text-slate-900 leading-relaxed min-h-[64px] flex flex-col items-center justify-center"></div>
+                <button id="exam-replay-btn" onclick="examReplay()" class="hidden px-4 py-2 bg-violet-50 text-violet-700 rounded-xl font-bold text-sm hover:bg-violet-100 transition"><i class="fa-solid fa-arrows-rotate"></i> 다시 듣기 (<span id="exam-replay-count">1</span>회 남음)</button>
+                <input type="text" id="exam-input" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" lang="en" placeholder="정답을 직접 입력하세요" class="w-full text-center text-lg font-bold py-3 border-2 rounded-xl focus:outline-none focus:border-purple-500">
+                <div id="exam-feedback" class="hidden rounded-xl p-3 text-sm font-bold"></div>
+                <button id="exam-submit-btn" onclick="submitExamAnswer()" class="w-full py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition"><span id="exam-submit-label">제출하기</span></button>
+            </div>
+        </section>
+
+        <!-- ================= EXAM RESULT ================= -->
+        <section id="view-exam-result" class="view-section hidden max-w-md mx-auto">
+            <div class="bg-white rounded-3xl p-8 shadow-xl border border-slate-100 text-center space-y-6">
+                <div id="exam-rank-icon" class="text-7xl">🥇</div>
+                <div>
+                    <h2 id="exam-rank-title" class="text-2xl font-black text-slate-900">골드 등급 달성!</h2>
+                    <p id="exam-rank-sub" class="text-sm text-slate-500 mt-1">-</p>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                    <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">시험 결과</div>
+                    <div id="exam-stat" class="text-3xl font-black text-purple-600 mt-1">0 / 15</div>
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <button onclick="startExam()" class="w-full py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition shadow-md">재도전하기</button>
+                    <button onclick="navigate('home')" class="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition">학습 홈으로 이동</button>
+                </div>
+            </div>
         </section>
 
         <section id="view-drill-menu" class="view-section hidden space-y-6">
@@ -536,6 +651,12 @@
             document.getElementById('teacher-access-password').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') verifyTeacherAccessPassword();
             });
+            document.getElementById('dict-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') checkDictAnswer();
+            });
+            document.getElementById('exam-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') submitExamAnswer();
+            });
         };
 
         function loadAllData() {
@@ -631,11 +752,26 @@
             document.getElementById('stats-sentence-count').innerText = `${unit.sentences ? unit.sentences.length : 0}개`;
         }
 
+        // TTS 재생 속도 (받아쓰기 화면에서 변경 가능, 앱 전체에 적용)
+        let ttsRate = 0.75;
+        const TTS_RATES = { slow: 0.6, normal: 0.75, fast: 0.9 };
+
+        function setTtsRate(mode) {
+            ttsRate = TTS_RATES[mode] || 0.75;
+            document.querySelectorAll('.tts-rate-btn').forEach(b => {
+                if (b.dataset.rate === mode) b.className = "tts-rate-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white transition";
+                else b.className = "tts-rate-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 transition";
+                b.dataset.rate === mode ? b.setAttribute('aria-pressed','true') : b.setAttribute('aria-pressed','false');
+            });
+            const labels = { slow: "🐢 느리게", normal: "보통", fast: "🐇 빠르게" };
+            showToast(`발음 속도: ${labels[mode]}`);
+        }
+
         function speakText(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'en-US'; utterance.rate = 0.85;
+                utterance.lang = 'en-US'; utterance.rate = ttsRate;
                 window.speechSynthesis.speak(utterance);
             }
         }
@@ -1071,6 +1207,237 @@
                 return;
             }
             loadDirRound();
+        }
+
+        // ================= 🎧 받아쓰기(딕테이션) 엔진 =================
+        let dictState = { pool: [], index: 0, score: 0, replaysLeft: 2, current: null, answered: false };
+
+        function openDictationSetup() {
+            const wrapper = document.getElementById('dict-unit-checkboxes');
+            wrapper.innerHTML = '';
+            state.units.forEach(u => {
+                if (!u.sentences || u.sentences.length === 0) return;
+                const div = document.createElement('label');
+                div.className = "flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition";
+                div.innerHTML = `
+                    <input type="checkbox" value="${u.id}" class="dict-unit-cb rounded text-blue-500 focus:ring-blue-400 w-4 h-4" checked>
+                    <div class="text-sm font-bold text-slate-700 truncate flex-grow">${u.title}</div>
+                    <span class="text-xs bg-white border px-2 py-0.5 rounded text-slate-500 font-semibold shrink-0">문장 ${u.sentences.length}개</span>`;
+                wrapper.appendChild(div);
+            });
+            // 길찾기 표현도 범위에 포함 가능
+            const dirDiv = document.createElement('label');
+            dirDiv.className = "flex items-center space-x-3 p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 cursor-pointer hover:bg-emerald-100 transition";
+            dirDiv.innerHTML = `
+                <input type="checkbox" value="__directions__" class="dict-unit-cb rounded text-emerald-500 focus:ring-emerald-400 w-4 h-4" checked>
+                <div class="text-sm font-bold text-emerald-800 truncate flex-grow">🧭 길묻고 답하기 표현</div>
+                <span class="text-xs bg-white border px-2 py-0.5 rounded text-slate-500 font-semibold shrink-0">문장 ${directionDeck.sentences.length}개</span>`;
+            wrapper.appendChild(dirDiv);
+            document.getElementById('dict-setup-modal').classList.remove('hidden');
+        }
+        function closeDictationSetup() { document.getElementById('dict-setup-modal').classList.add('hidden'); }
+
+        function startDictationGame() {
+            const checked = [];
+            document.querySelectorAll('.dict-unit-cb').forEach(cb => { if (cb.checked) checked.push(cb.value); });
+            if (checked.length === 0) { showToast("최소 한 개 이상의 범위를 선택해야 합니다!"); return; }
+            let pool = [];
+            state.units.forEach(u => {
+                if (checked.includes(u.id) && u.sentences) u.sentences.forEach(s => pool.push({ en: s.en, ko: s.ko }));
+            });
+            if (checked.includes('__directions__')) directionDeck.sentences.forEach(s => pool.push({ en: s.en, ko: s.ko }));
+            if (pool.length === 0) { showToast("선택한 범위에 문장이 없습니다."); return; }
+            pool.sort(() => Math.random() - 0.5);
+            dictState = { pool, index: 0, score: 0, replaysLeft: 2, current: null, answered: false };
+            closeDictationSetup();
+            navigate('dictation-play');
+            loadDictItem();
+        }
+
+        function loadDictItem() {
+            if (dictState.index >= dictState.pool.length) { finishDictation(); return; }
+            dictState.current = dictState.pool[dictState.index];
+            dictState.replaysLeft = 2;
+            dictState.answered = false;
+            document.getElementById('dict-progress-text').innerText = `${dictState.index + 1} / ${dictState.pool.length}`;
+            document.getElementById('dict-replay-count').innerText = dictState.replaysLeft;
+            document.getElementById('dict-input').value = '';
+            document.getElementById('dict-input').disabled = false;
+            const fb = document.getElementById('dict-feedback');
+            fb.classList.add('hidden'); fb.innerText = '';
+            document.getElementById('dict-check-label').innerText = "확인하기";
+            setTimeout(() => speakText(dictState.current.en), 400);
+            document.getElementById('dict-input').focus();
+        }
+
+        function dictReplay() {
+            if (!dictState.current) return;
+            if (dictState.answered) { speakText(dictState.current.en); return; } // 채점 후에는 자유 재생
+            if (dictState.replaysLeft <= 0) { showToast("다시 듣기 기회를 모두 사용했어요! 들은 대로 적어 보세요."); return; }
+            dictState.replaysLeft--;
+            document.getElementById('dict-replay-count').innerText = dictState.replaysLeft;
+            speakText(dictState.current.en);
+        }
+        function dictHint() { if (dictState.current) showToast(`💡 뜻: ${dictState.current.ko}`); }
+
+        function checkDictAnswer() {
+            if (dictState.answered) { dictState.index++; loadDictItem(); return; }
+            const val = cleanText(document.getElementById('dict-input').value, true);
+            const correct = cleanText(dictState.current.en, true);
+            dictState.answered = true;
+            document.getElementById('dict-input').disabled = true;
+            const fb = document.getElementById('dict-feedback');
+            fb.classList.remove('hidden');
+            if (val === correct && val !== "") {
+                dictState.score++;
+                fb.className = "rounded-xl p-3 text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200";
+                fb.innerText = `⭕ 정답! "${dictState.current.en}"`;
+            } else {
+                fb.className = "rounded-xl p-3 text-sm font-bold bg-rose-50 text-rose-700 border border-rose-200";
+                fb.innerText = `❌ 정답 문장: "${dictState.current.en}"`;
+            }
+            document.getElementById('dict-check-label').innerText = "다음 문장";
+        }
+
+        function finishDictation() {
+            navigate('dict-result');
+            const total = dictState.pool.length;
+            document.getElementById('dict-final-score').innerText = `${dictState.score} / ${total}`;
+            document.getElementById('dict-final-pct').innerText = `정답률 ${total > 0 ? Math.round((dictState.score / total) * 100) : 0}%`;
+        }
+
+        // ================= 👑 종합 승급 시험(보스전) 엔진 =================
+        const EXAM_TOTAL = 15;
+        let examState = { words: [], sents: [], qNum: 0, correct: 0, lives: 3, current: null, qType: '', answerString: '', stripPunct: true, replaysLeft: 1, answered: false, finished: false };
+
+        function startExam() {
+            const words = [], sents = [];
+            state.units.forEach(u => {
+                if (u.words) u.words.forEach(w => words.push(w));
+                if (u.sentences) u.sentences.forEach(s => sents.push(s));
+            });
+            directionDeck.words.forEach(w => words.push(w));
+            directionDeck.sentences.forEach(s => sents.push({ en: s.en, ko: s.ko }));
+            if (words.length + sents.length < EXAM_TOTAL) { showToast("등록된 문항이 너무 적어 시험을 만들 수 없습니다."); return; }
+            examState = { words, sents, qNum: 0, correct: 0, lives: 3, current: null, qType: '', answerString: '', stripPunct: true, replaysLeft: 1, answered: false, finished: false };
+            renderExamLives();
+            navigate('exam-play');
+            nextExamQuestion();
+        }
+
+        function renderExamLives() {
+            document.getElementById('exam-lives').innerText = "❤️".repeat(examState.lives) + "🤍".repeat(3 - examState.lives);
+        }
+
+        function nextExamQuestion() {
+            if (examState.qNum >= EXAM_TOTAL) { finishExam(true); return; }
+            examState.qNum++;
+            examState.answered = false;
+            examState.replaysLeft = 1;
+            document.getElementById('exam-progress-text').innerText = `${examState.qNum} / ${EXAM_TOTAL}`;
+            document.getElementById('exam-input').value = '';
+            document.getElementById('exam-input').disabled = false;
+            const fb = document.getElementById('exam-feedback');
+            fb.classList.add('hidden'); fb.innerText = '';
+            document.getElementById('exam-submit-label').innerText = "제출하기";
+            const replayBtn = document.getElementById('exam-replay-btn');
+            replayBtn.classList.add('hidden');
+
+            const badge = document.getElementById('exam-type-badge');
+            const q = document.getElementById('exam-question');
+
+            // 약 30%는 단어, 나머지는 문장 문제
+            if (Math.random() < 0.3 && examState.words.length > 0) {
+                const item = examState.words[Math.floor(Math.random() * examState.words.length)];
+                examState.current = item; examState.qType = 'word';
+                examState.answerString = item.en; examState.stripPunct = false;
+                badge.innerText = "✏️ 단어 영작"; badge.className = "inline-block px-3 py-1 bg-amber-100 rounded-full text-xs font-bold text-amber-700";
+                q.innerHTML = `<div class="text-sm text-slate-400 font-bold mb-1">우리말 뜻</div><div>${item.ko}</div>`;
+            } else {
+                const item = examState.sents[Math.floor(Math.random() * examState.sents.length)];
+                examState.current = item;
+                const types = ['dict', 'trans'];
+                if (item.blank) types.push('blank');
+                examState.qType = types[Math.floor(Math.random() * types.length)];
+                if (examState.qType === 'dict') {
+                    examState.answerString = item.en; examState.stripPunct = true;
+                    badge.innerText = "🎧 받아쓰기"; badge.className = "inline-block px-3 py-1 bg-sky-100 rounded-full text-xs font-bold text-sky-700";
+                    q.innerHTML = `<div class="text-slate-400"><i class="fa-solid fa-volume-high text-3xl text-sky-400"></i></div><div class="text-sm text-slate-500 font-bold mt-2">소리를 듣고 문장을 그대로 쓰세요</div>`;
+                    document.getElementById('exam-replay-count').innerText = examState.replaysLeft;
+                    replayBtn.classList.remove('hidden');
+                    setTimeout(() => speakText(item.en), 400);
+                } else if (examState.qType === 'trans') {
+                    examState.answerString = item.en; examState.stripPunct = true;
+                    badge.innerText = "📝 한→영 영작"; badge.className = "inline-block px-3 py-1 bg-emerald-100 rounded-full text-xs font-bold text-emerald-700";
+                    q.innerHTML = `<div class="text-sm text-slate-400 font-bold mb-1">우리말 문장을 영어로!</div><div>"${item.ko}"</div>`;
+                } else {
+                    examState.answerString = item.blank; examState.stripPunct = false;
+                    const safeRegex = new RegExp(item.blank.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+                    const masked = item.en.replace(safeRegex, "_______");
+                    badge.innerText = "🧩 빈칸 채우기"; badge.className = "inline-block px-3 py-1 bg-indigo-100 rounded-full text-xs font-bold text-indigo-700";
+                    q.innerHTML = `<div class="text-sm text-slate-400 font-bold mb-1">뜻: ${item.ko}</div><div>${masked}</div>`;
+                }
+            }
+            document.getElementById('exam-input').focus();
+        }
+
+        function examReplay() {
+            if (examState.qType !== 'dict' || !examState.current) return;
+            if (examState.answered) { speakText(examState.current.en); return; }
+            if (examState.replaysLeft <= 0) { showToast("다시 듣기 기회를 모두 사용했어요!"); return; }
+            examState.replaysLeft--;
+            document.getElementById('exam-replay-count').innerText = examState.replaysLeft;
+            speakText(examState.current.en);
+        }
+
+        function submitExamAnswer() {
+            if (examState.finished) return;
+            if (examState.answered) { nextExamQuestion(); return; }
+            const val = cleanText(document.getElementById('exam-input').value, examState.stripPunct);
+            const correct = cleanText(examState.answerString, examState.stripPunct);
+            examState.answered = true;
+            document.getElementById('exam-input').disabled = true;
+            const fb = document.getElementById('exam-feedback');
+            fb.classList.remove('hidden');
+            if (val === correct && val !== "") {
+                examState.correct++;
+                fb.className = "rounded-xl p-3 text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200";
+                fb.innerText = `⭕ 정답! "${examState.answerString}"`;
+                document.getElementById('exam-submit-label').innerText = "다음 문제";
+            } else {
+                examState.lives--;
+                renderExamLives();
+                fb.className = "rounded-xl p-3 text-sm font-bold bg-rose-50 text-rose-700 border border-rose-200";
+                fb.innerText = `❌ 정답: "${examState.answerString}" (남은 목숨 ${examState.lives}개)`;
+                if (examState.lives <= 0) {
+                    examState.finished = true;
+                    setTimeout(() => finishExam(false), 1500);
+                    return;
+                }
+                document.getElementById('exam-submit-label').innerText = "다음 문제";
+            }
+        }
+
+        function terminateExam() {
+            if (confirm("승급 시험을 기권하고 나가시겠습니까? 진행 상황은 저장되지 않습니다.")) navigate('home');
+        }
+
+        function finishExam(passed) {
+            examState.finished = true;
+            navigate('exam-result');
+            const icon = document.getElementById('exam-rank-icon');
+            const title = document.getElementById('exam-rank-title');
+            const sub = document.getElementById('exam-rank-sub');
+            document.getElementById('exam-stat').innerText = `${examState.correct} / ${EXAM_TOTAL} 정답`;
+            if (!passed) {
+                icon.innerText = "💥";
+                title.innerText = "아쉽게 탈락...";
+                sub.innerText = "목숨을 모두 잃었어요. 드릴 코스로 복습한 뒤 재도전해 보세요!";
+                return;
+            }
+            if (examState.lives === 3) { icon.innerText = "🥇"; title.innerText = "골드 등급 달성!"; sub.innerText = "무실점 완벽 통과! 전 범위를 완전히 마스터했어요."; }
+            else if (examState.lives === 2) { icon.innerText = "🥈"; title.innerText = "실버 등급 달성!"; sub.innerText = "단 한 문제 실수! 골드까지 한 걸음 남았어요."; }
+            else { icon.innerText = "🥉"; title.innerText = "브론즈 등급 달성!"; sub.innerText = "아슬아슬하게 통과! 틀린 유형을 복습하고 재도전해 보세요."; }
         }
 
         // ================= DRILL TRAINING CORE LOGIC =================
