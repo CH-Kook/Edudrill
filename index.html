@@ -17,93 +17,72 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        :root { --ink: #192e43; --accent: #176449; --paper: #f6f7f3; --line: #d8e0d9; }
+        body { background: var(--paper); color: var(--ink); }
+        button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+            outline: 3px solid #176449; outline-offset: 3px;
+        }
+        [tabindex="-1"]:focus { outline: none; }
+        .study-header { background: #fff; border-bottom: 1px solid var(--line); }
+        .study-width { width: min(100%, 60rem); margin-inline: auto; }
+        .study-link { min-height: 44px; display: inline-flex; align-items: center; gap: .5rem; }
+        .study-title { font-size: clamp(1.65rem, 4vw, 2.5rem); font-weight: 800; line-height: 1.3; letter-spacing: -.035em; }
+        .study-muted { color: #4e605d; }
+        .study-list { display: grid; gap: .625rem; }
+        .study-row {
+            display: flex; align-items: center; gap: .875rem; width: 100%; min-height: 60px;
+            padding: .75rem 1rem; text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 12px;
+        }
+        .study-row:enabled:hover { background: #edf5ef; border-color: #a5bdae; }
+        .study-row:disabled { background: #eef1ec; color: #4e605d; }
+        .study-row > span:nth-child(2) { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+        .study-number {
+            flex: none; min-width: 2.7rem; text-align: center; padding: .4rem;
+            background: #e8f2e9; color: var(--accent); border-radius: 7px;
+            font-size: .875rem; font-weight: 700;
+        }
+        .study-panel { padding: clamp(1rem, 4vw, 2rem); background: #fff; border: 1px solid var(--line); border-radius: 16px; }
+        .study-primary { background: var(--accent); color: #fff; border-radius: 9px; padding: .7rem 1rem; min-height: 44px; font-weight: 700; }
+        .study-primary:hover { background: #104b36; }
+        .study-secondary { border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 9px; padding: .6rem .85rem; min-height: 44px; font-weight: 600; }
+        .study-secondary:hover { background: #edf5ef; }
+        .study-tools { display: flex; gap: .5rem; flex-wrap: wrap; }
+        .study-activities { border-top: 1px solid var(--line); margin-top: 2rem; padding-top: 1.25rem; }
+        .study-progress { height: .5rem; overflow: hidden; background: #dde8e1; border-radius: 10px; }
+        .study-progress > div { height: 100%; background: var(--accent); }
+        .study-answer { padding: .875rem; background: #eef4ee; border-radius: 9px; overflow-wrap: anywhere; }
+        .study-answer.is-wrong { background: #f9eeeb; }
+        dialog.study-dialog { width: min(calc(100% - 2rem), 30rem); max-height: calc(100% - 2rem); border-radius: 14px; }
+        dialog.study-dialog::backdrop { background: rgb(25 46 67 / .55); }
+        @media (min-width: 48rem) { #unit-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
+<body class="min-h-screen flex flex-col">
 
-    <header class="bg-indigo-600 text-white shadow-md sticky top-0 z-40">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="navigate('home')">
-                <div class="bg-white text-indigo-600 p-2 rounded-xl shadow-inner font-bold text-xl">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                </div>
-                <div>
-                    <h1 class="font-extrabold text-lg leading-tight tracking-wide">EduDrill <span class="text-amber-300">English</span></h1>
-                    <p class="text-xs text-indigo-200">자기주도형 영어 반복 학습기</p>
-                </div>
-            </div>
-            <nav class="flex items-center space-x-2">
-                <button onclick="navigate('home')" class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition flex items-center gap-1">
-                    <i class="fa-solid fa-house"></i> <span class="hidden sm:inline">학습실</span>
-                </button>
-                <button onclick="openTeacherAccessModal()" class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition bg-indigo-800 flex items-center gap-1">
-                    <i class="fa-solid fa-user-gear"></i> <span>교사용 관리자</span>
-                </button>
-            </nav>
+    <header class="study-header">
+        <div class="study-width px-4 md:px-6 flex items-center justify-between gap-4 py-2">
+            <button type="button" onclick="navigate('home')" class="study-link text-lg font-extrabold" aria-label="EduDrill 학습 홈">
+                EduDrill <span class="text-sm font-medium study-muted">영어</span>
+            </button>
+            <button type="button" onclick="openTeacherAccessModal()" class="study-link text-sm font-semibold">교사용</button>
         </div>
     </header>
 
     <main class="flex-grow max-w-6xl w-full mx-auto p-4 md:p-6">
-
-        <section id="view-home" class="view-section space-y-6">
-            <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-3xl p-6 md:p-8 shadow-lg relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div class="relative z-10 max-w-xl">
-                    <span class="bg-white text-orange-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">스피드 게임 모드</span>
-                    <h2 class="text-2xl md:text-3xl font-extrabold mt-2 leading-tight">💥 서바이벌 스피드 퀴즈!</h2>
-                    <p class="text-amber-50 mt-2 text-sm">원하는 단원을 조합해 박진감 넘치는 퀴즈에 도전하세요! 맞추면 +2초, 틀리면 -5초! 귀로 듣고 머리로 맞추는 스피드 서바이벌!</p>
+        <section id="view-home" class="view-section study-width">
+            <h1 class="study-title mb-4 md:mb-6" tabindex="-1">초등 6학년 영어 복습</h1>
+            <div id="unit-grid" class="study-list" aria-label="복습할 단원"></div>
+            <section class="study-activities" aria-labelledby="activity-title">
+                <h2 id="activity-title" class="text-lg font-bold mb-3">다른 활동</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button type="button" onclick="openDictationSetup()" class="study-secondary">받아쓰기</button>
+                    <button type="button" onclick="navigate('directions-menu')" class="study-secondary">길찾기</button>
+                    <button type="button" onclick="openSpeedQuizSetup()" class="study-secondary">스피드 퀴즈</button>
+                    <button type="button" onclick="startExam()" class="study-secondary">종합 복습</button>
                 </div>
-                <button onclick="openSpeedQuizSetup()" class="relative z-10 px-6 py-3 bg-white text-orange-600 font-black rounded-2xl shadow-md hover:bg-amber-50 transition transform active:scale-95 flex items-center gap-2 text-base shrink-0 whitespace-nowrap">
-                    <i class="fa-solid fa-bolt-lightning animate-pulse"></i> 퀴즈 시작하기
-                </button>
-                <div class="absolute right-4 bottom-0 opacity-10 text-[140px] pointer-events-none hidden lg:block">
-                    <i class="fa-solid fa-stopwatch"></i>
-                </div>
-            </div>
-
-            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-3xl p-6 md:p-8 shadow-lg relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div class="relative z-10 max-w-xl">
-                    <span class="bg-white text-teal-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">총괄평가 대비</span>
-                    <h2 class="text-2xl md:text-3xl font-extrabold mt-2 leading-tight">🧭 길묻고 답하기 미니게임!</h2>
-                    <p class="text-teal-50 mt-2 text-sm">지도 위에서 직접 움직이며 길찾기를 배워요. 표현 배우기 → 길 따라가기 → 블록으로 안내하기 → 길 안내 영작까지 4단계 코스!</p>
-                </div>
-                <button onclick="navigate('directions-menu')" class="relative z-10 px-6 py-3 bg-white text-teal-600 font-black rounded-2xl shadow-md hover:bg-emerald-50 transition transform active:scale-95 flex items-center gap-2 text-base shrink-0 whitespace-nowrap">
-                    <i class="fa-solid fa-map-location-dot"></i> 길찾기 시작
-                </button>
-                <div class="absolute right-4 bottom-0 opacity-10 text-[140px] pointer-events-none hidden lg:block">
-                    <i class="fa-solid fa-signs-post"></i>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-3xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between gap-3">
-                    <div>
-                        <span class="bg-white text-blue-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">듣기 집중 훈련</span>
-                        <h2 class="text-xl md:text-2xl font-extrabold mt-2">🎧 문장 받아쓰기</h2>
-                        <p class="text-sky-50 mt-1 text-sm">원어민 발음을 듣고 문장을 통째로 받아 적어요. 보기 없음! 다시 듣기는 2회뿐!</p>
-                    </div>
-                    <button onclick="openDictationSetup()" class="self-start px-5 py-2.5 bg-white text-blue-600 font-black rounded-2xl shadow-md hover:bg-sky-50 transition active:scale-95 text-sm"><i class="fa-solid fa-headphones"></i> 받아쓰기 시작</button>
-                    <div class="absolute right-2 bottom-0 opacity-10 text-[100px] pointer-events-none hidden lg:block"><i class="fa-solid fa-ear-listen"></i></div>
-                </div>
-                <div class="bg-gradient-to-r from-violet-500 to-purple-700 text-white rounded-3xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between gap-3">
-                    <div>
-                        <span class="bg-white text-purple-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">전 범위 최종 관문</span>
-                        <h2 class="text-xl md:text-2xl font-extrabold mt-2">👑 종합 승급 시험</h2>
-                        <p class="text-violet-100 mt-1 text-sm">전 단원 혼합 15문제, 전부 직접 타이핑! 목숨 3개로 골드 등급에 도전하세요.</p>
-                    </div>
-                    <button onclick="startExam()" class="self-start px-5 py-2.5 bg-white text-purple-700 font-black rounded-2xl shadow-md hover:bg-violet-50 transition active:scale-95 text-sm"><i class="fa-solid fa-crown"></i> 시험 도전하기</button>
-                    <div class="absolute right-2 bottom-0 opacity-10 text-[100px] pointer-events-none hidden lg:block"><i class="fa-solid fa-medal"></i></div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-book text-indigo-500"></i> 단원별 정밀 드릴 코스
-                    </h3>
-                    <span id="unit-count-badge" class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-semibold">총 0개 단원</span>
-                </div>
-                <div id="unit-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-            </div>
+            </section>
         </section>
 
         <div id="quiz-setup-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
@@ -220,19 +199,23 @@
         </section>
 
         <!-- ================= DICTATION SETUP MODAL ================= -->
-        <div id="dict-setup-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
+        <dialog id="dict-setup-modal" class="study-dialog" aria-labelledby="dict-setup-title">
             <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-xl space-y-5">
                 <div class="flex justify-between items-center border-b pb-3">
-                    <h3 class="font-extrabold text-slate-900 text-xl flex items-center gap-2"><i class="fa-solid fa-headphones text-blue-500"></i> 받아쓰기 범위 설정</h3>
-                    <button onclick="closeDictationSetup()" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+                    <h3 id="dict-setup-title" class="font-extrabold text-slate-900 text-xl flex items-center gap-2"><i class="fa-solid fa-headphones text-blue-500"></i> 받아쓰기 범위 설정</h3>
+                    <button onclick="closeDictationSetup()" aria-label="닫기" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <p class="text-sm text-slate-500">받아쓰기에 포함할 범위를 체크해 주세요. 문장이 등록된 단원만 표시됩니다.</p>
                 <div id="dict-unit-checkboxes" class="space-y-2 max-h-48 overflow-y-auto p-1"></div>
+                <label class="flex items-center justify-between gap-4 font-semibold">문제 수
+                    <select id="dict-limit" class="study-secondary"><option value="5">5문제</option><option value="10">10문제</option><option value="0">전체</option></select>
+                </label>
+                <p id="dict-setup-error" class="text-sm font-semibold text-rose-800 empty:hidden" role="status"></p>
                 <div class="pt-2">
-                    <button onclick="startDictationGame()" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold rounded-2xl hover:from-sky-600 hover:to-blue-700 transition shadow-md flex items-center justify-center gap-2 text-base"><i class="fa-solid fa-play"></i> 받아쓰기 시작!</button>
+                    <button type="button" onclick="startDictationGame()" class="study-primary w-full">받아쓰기 시작</button>
                 </div>
             </div>
-        </div>
+        </dialog>
 
         <!-- ================= DICTATION PLAY ================= -->
         <section id="view-dictation-play" class="view-section hidden max-w-xl mx-auto space-y-4">
@@ -250,12 +233,13 @@
                     <button data-rate="normal" onclick="setTtsRate('normal')" class="tts-rate-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white transition">보통</button>
                     <button data-rate="fast" onclick="setTtsRate('fast')" class="tts-rate-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 transition">🐇 빠르게</button>
                 </div>
-                <div class="flex justify-center gap-2">
-                    <button id="dict-replay-btn" onclick="dictReplay()" class="px-4 py-2 bg-sky-50 text-blue-700 rounded-xl font-bold text-sm hover:bg-sky-100 transition"><i class="fa-solid fa-arrows-rotate"></i> 다시 듣기 (<span id="dict-replay-count">2</span>회 남음)</button>
-                    <button onclick="dictHint()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition"><i class="fa-solid fa-lightbulb text-amber-500"></i> 뜻 보기</button>
+                <div class="flex flex-wrap justify-center gap-2">
+                    <button type="button" id="dict-listen" onclick="listenToDictation()" class="study-secondary">소리 듣기</button>
+                    <button type="button" onclick="dictHint()" class="study-secondary">뜻 보기</button>
                 </div>
-                <input type="text" id="dict-input" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" lang="en" placeholder="들린 문장 전체 입력" class="w-full text-center text-lg font-bold py-3 border-2 rounded-xl focus:outline-none focus:border-blue-500">
-                <div id="dict-feedback" class="hidden rounded-xl p-3 text-sm font-bold"></div>
+                <input type="text" id="dict-input" aria-label="들은 영어 문장" aria-describedby="dict-feedback dict-hint" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" lang="en" placeholder="들린 문장 전체 입력" class="w-full text-center text-lg font-bold py-3 border-2 rounded-xl focus:outline-none focus:border-blue-500">
+                <div id="dict-feedback" role="status" class="hidden rounded-xl p-3 text-sm font-bold"></div>
+                <p id="dict-hint" class="text-sm study-muted empty:hidden" aria-live="polite"></p>
                 <button id="dict-check-btn" onclick="checkDictAnswer()" class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition"><span id="dict-check-label">확인하기</span></button>
             </div>
         </section>
@@ -313,89 +297,50 @@
             </div>
         </section>
 
-        <section id="view-drill-menu" class="view-section hidden space-y-6">
-            <div class="flex items-center space-x-3 mb-2">
-                <button onclick="navigate('home')" class="text-slate-500 hover:text-indigo-600 transition p-2 bg-white rounded-lg shadow-sm"><i class="fa-solid fa-arrow-left"></i></button>
-                <div>
-                    <span id="drill-menu-subtitle" class="text-xs text-indigo-600 font-semibold uppercase tracking-wider">단원 선택됨</span>
-                    <h2 id="drill-menu-title" class="text-2xl font-extrabold text-slate-900">-</h2>
+        <section id="view-drill-menu" class="view-section hidden max-w-2xl mx-auto">
+            <button type="button" onclick="navigate('home')" class="study-link study-muted text-sm mb-2">
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> 단원 목록
+            </button>
+            <h2 id="drill-menu-title" class="study-title" tabindex="-1"></h2>
+            <p id="drill-menu-english" class="study-muted mt-1" lang="en"></p>
+            <div id="drill-activities" class="study-list mt-5"></div>
+        </section>
+
+        <section id="view-drill-play" class="view-section hidden max-w-2xl mx-auto">
+            <div class="flex justify-between items-center gap-3 mb-2">
+                <button type="button" onclick="leaveDrill()" class="study-link study-muted text-sm">
+                    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> 단원으로
+                </button>
+                <span id="play-progress-text" class="tabular-nums font-bold"></span>
+            </div>
+            <h2 id="play-drill-badge" class="text-xl font-bold mb-2" tabindex="-1"></h2>
+            <div class="study-progress mb-4" aria-hidden="true"><div id="play-progress-bar"></div></div>
+            <div class="study-panel space-y-4">
+                <div id="play-interactive-area"></div>
+                <div class="study-tools">
+                    <button type="button" id="play-hint-btn" onclick="showHelpHint()" class="study-secondary hidden">힌트</button>
+                    <button type="button" id="play-speech-btn" onclick="speakActiveItem()" class="study-secondary hidden">발음 듣기</button>
                 </div>
-            </div>
-            <div class="grid grid-cols-3 gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center">
-                <div><div class="text-xs text-slate-500">단어 개수</div><div id="stats-word-count" class="text-lg font-bold text-indigo-600">-</div></div>
-                <div class="border-x border-slate-100"><div class="text-xs text-slate-500">핵심 문장</div><div id="stats-sentence-count" class="text-lg font-bold text-emerald-600">-</div></div>
-                <div><div class="text-xs text-slate-500">나의 상태</div><div id="stats-progress" class="text-lg font-bold text-amber-500">대기중</div></div>
-            </div>
-            <div class="space-y-4">
-                <h3 class="font-bold text-slate-800 text-lg">단계별 정밀 복습 코스</h3>
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <div onclick="startDrill(1)" class="bg-white hover:border-indigo-400 border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between group">
-                        <div><div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">1</div><h4 class="font-bold text-slate-800 mb-1">플래시 카드</h4><p class="text-xs text-slate-500">뜻과 소리를 매칭하며 의미를 정확하게 각인합니다.</p></div>
-                        <span class="mt-4 text-xs font-semibold text-indigo-600 flex items-center gap-1 group-hover:underline">시작 <i class="fa-solid fa-chevron-right"></i></span>
-                    </div>
-                    <div onclick="startDrill(2)" class="bg-white hover:border-amber-400 border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between group">
-                        <div><div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-amber-500 group-hover:text-white transition">2</div><h4 class="font-bold text-slate-800 mb-1">단어 타이핑</h4><p class="text-xs text-slate-500">의미를 보고 자판을 두드리며 스펠링을 체득합니다.</p></div>
-                        <span class="mt-4 text-xs font-semibold text-amber-600 flex items-center gap-1 group-hover:underline">시작 <i class="fa-solid fa-chevron-right"></i></span>
-                    </div>
-                    <div onclick="startDrill(3)" class="bg-white hover:border-emerald-400 border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between group">
-                        <div><div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-emerald-500 group-hover:text-white transition">3</div><h4 class="font-bold text-slate-800 mb-1">문장 빈칸 채우기</h4><p class="text-xs text-slate-500">예문 안에서 키워드 단어가 들어갈 자리를 매칭합니다.</p></div>
-                        <span class="mt-4 text-xs font-semibold text-emerald-600 flex items-center gap-1 group-hover:underline">시작 <i class="fa-solid fa-chevron-right"></i></span>
-                    </div>
-                    <div onclick="startDrill(4)" class="bg-white hover:border-pink-400 border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between group">
-                        <div><div class="w-10 h-10 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-pink-500 group-hover:text-white transition">4</div><h4 class="font-bold text-slate-800 mb-1">문장 카드 조립</h4><p class="text-xs text-slate-500">어순 블록을 다시 배열하며 구조 감각을 익힙니다.</p></div>
-                        <span class="mt-4 text-xs font-semibold text-pink-600 flex items-center gap-1 group-hover:underline">시작 <i class="fa-solid fa-chevron-right"></i></span>
-                    </div>
-                    <div onclick="startDrill(5)" class="bg-white hover:border-cyan-400 border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between group">
-                        <div><div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-cyan-500 group-hover:text-white transition">5</div><h4 class="font-bold text-slate-800 mb-1">실전 통영작</h4><p class="text-xs text-slate-500">가이드 번역을 보고 전체 문장을 완전히 작성합니다.</p></div>
-                        <span class="mt-4 text-xs font-semibold text-cyan-600 flex items-center gap-1 group-hover:underline">시작 <i class="fa-solid fa-chevron-right"></i></span>
-                    </div>
+                <p id="play-hint-text" class="text-sm study-muted empty:hidden" aria-live="polite"></p>
+                <p id="play-error" class="text-sm font-semibold text-rose-800 empty:hidden" role="status"></p>
+                <div id="play-feedback" class="study-answer hidden" role="status"></div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" id="play-next-btn" onclick="checkOrNextItem()" class="study-primary flex-1"></button>
+                    <button type="button" id="play-skip-btn" onclick="skipItem()" class="study-secondary">건너뛰기</button>
                 </div>
             </div>
         </section>
 
-        <section id="view-drill-play" class="view-section hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <button onclick="navigate('drill-menu')" class="text-slate-500 hover:text-slate-800 transition p-1 text-sm"><i class="fa-solid fa-circle-chevron-left text-xl"></i> 나가기</button>
-                    <span id="play-drill-badge" class="text-xs px-2.5 py-0.5 rounded font-bold">1단계</span>
-                </div>
-                <div class="text-sm font-semibold text-slate-500">진행도: <span id="play-progress-text" class="text-indigo-600">0/0</span></div>
-            </div>
-            <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden"><div id="play-progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div></div>
-            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 min-h-[350px] flex flex-col justify-between relative">
-                <div id="play-interactive-area" class="flex-grow flex flex-col justify-center items-center py-4"></div>
-                <div id="play-action-bar" class="pt-4 border-t border-slate-100 flex justify-between items-center">
-                    <div>
-                        <button id="play-hint-btn" onclick="showHelpHint()" class="hidden text-slate-500 hover:text-slate-800 transition text-sm flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-lg font-medium"><i class="fa-solid fa-lightbulb text-amber-500"></i> <span>힌트보기</span></button>
-                        <button id="play-speech-btn" onclick="speakActiveItem()" class="text-slate-500 hover:text-indigo-600 transition text-sm flex items-center gap-1 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg font-semibold"><i class="fa-solid fa-volume-high"></i> <span>발음 듣기</span></button>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button id="play-skip-btn" onclick="skipItem()" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-xl hover:bg-slate-50 font-semibold transition text-sm">넘어가기</button>
-                        <button id="play-next-btn" onclick="checkOrNextItem()" class="px-6 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold transition text-sm flex items-center gap-1"><span id="play-next-label">확인하기</span> <i class="fa-solid fa-circle-check"></i></button>
-                    </div>
-                </div>
-                <div id="play-feedback-banner" class="absolute inset-x-0 bottom-0 py-3 px-6 rounded-b-3xl text-center font-bold text-white transition-all duration-300 transform translate-y-full opacity-0 z-10 flex justify-between items-center">
-                    <span id="play-feedback-text">잘했어요!</span>
-                    <button onclick="dismissFeedback()" class="text-white hover:opacity-85 text-sm font-semibold">다음 <i class="fa-solid fa-arrow-right"></i></button>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-drill-result" class="view-section hidden space-y-6 max-w-lg mx-auto">
-            <div class="bg-white rounded-3xl p-8 shadow-md border border-slate-100 text-center space-y-6">
-                <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-amber-100 text-amber-500 text-5xl mb-2 animate-bounce"><i class="fa-solid fa-crown"></i></div>
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900">참 잘했어요! 완주 성공!</h2>
-                    <p id="result-drill-name" class="text-sm text-slate-500 font-semibold mt-1">-</p>
-                    <p id="result-unit-name" class="text-xs text-indigo-600 font-bold">-</p>
-                </div>
-                <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <div><div class="text-xs text-slate-400 font-medium">학습 완료 문항</div><div id="result-total-count" class="text-2xl font-bold text-slate-800">-</div></div>
-                    <div><div class="text-xs text-slate-400 font-medium">정답률 / 스코어</div><div id="result-score" class="text-2xl font-bold text-emerald-600">-</div></div>
-                </div>
-                <div class="flex flex-col space-y-2">
-                    <button onclick="navigate('drill-menu')" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition">단원 코스로 돌아가기</button>
-                    <button onclick="navigate('home')" class="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition">다른 단원 탐색하기</button>
+        <section id="view-drill-result" class="view-section hidden max-w-2xl mx-auto">
+            <div class="study-panel space-y-4">
+                <h2 class="study-title" tabindex="-1">연습 결과</h2>
+                <p id="result-unit-name" class="study-muted"></p>
+                <p id="result-score" class="text-xl font-bold"></p>
+                <p id="result-skipped" class="study-muted empty:hidden"></p>
+                <div class="study-tools">
+                    <button type="button" id="result-retry" onclick="retryDrill()" class="study-primary hidden"></button>
+                    <button type="button" onclick="navigate('drill-menu')" class="study-secondary">단원으로 돌아가기</button>
+                    <button type="button" onclick="navigate('home')" class="study-secondary">다른 단원 고르기</button>
                 </div>
             </div>
         </section>
@@ -403,7 +348,7 @@
         <div id="teacher-auth-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
             <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl space-y-4 text-center">
                 <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-lock"></i></div>
-                <div><h3 class="font-bold text-slate-900 text-lg">교사 관리자 인증</h3><p class="text-xs text-slate-400 mt-0.5">단원 편집을 위해 보안 패스워드를 입력하세요.</p></div>
+                <div><h3 class="font-bold text-slate-900 text-lg">교사용 편집</h3><p class="text-xs text-slate-400 mt-0.5">단원 편집을 위해 편집 코드를 입력하세요.</p></div>
                 <input type="password" id="teacher-access-password" placeholder="비밀번호 입력" class="w-full text-center px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-500 font-mono">
                 <div class="flex space-x-2">
                     <button onclick="closeTeacherAccessModal()" class="w-1/2 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200 transition">취소</button>
@@ -415,8 +360,8 @@
         <section id="view-teacher" class="view-section hidden space-y-6">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-user-gear text-indigo-600"></i> 교사용 콘텐츠 관리 시스템</h2>
-                    <p class="text-sm text-slate-500">단원을 새로 개설하거나 데이터를 관리하세요. 수정한 내용을 배포하려면 JSON으로 내려받아 AI에게 전달하세요.</p>
+                    <h2 class="text-2xl font-extrabold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-user-gear text-indigo-600"></i> 단원 편집</h2>
+                    <p class="text-sm text-slate-500">수정한 내용은 이 브라우저에 저장됩니다. 다른 기기에서 쓰려면 파일로 내보낸 뒤 가져오세요.</p>
                 </div>
                 <div class="flex space-x-2 flex-wrap gap-2">
                     <button onclick="resetToSystemDefault()" class="px-3 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl hover:bg-amber-100 text-xs font-bold transition flex items-center gap-1"><i class="fa-solid fa-rotate-left"></i> 기본 데이터로 초기화</button>
@@ -473,7 +418,7 @@
 
     <div id="export-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4">
-            <div class="flex justify-between items-center border-b pb-2"><h3 class="font-bold text-slate-900 text-lg">데이터 내보내기 / 코드 매립용</h3><button onclick="closeExportModal()" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="flex justify-between items-center border-b pb-2"><h3 class="font-bold text-slate-900 text-lg">단원 파일 내보내기</h3><button onclick="closeExportModal()" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button></div>
             <p class="text-xs text-slate-500">아래 코드를 복사하여 AI(Gemini)에게 전달하거나 파일로 소장해 두세요.</p>
             <textarea id="export-textarea" readonly class="w-full h-40 text-xs font-mono p-3 bg-slate-50 border rounded-lg" onclick="this.select()"></textarea>
             <div class="flex space-x-2">
@@ -487,7 +432,7 @@
         <i class="fa-solid fa-circle-info text-amber-400"></i> <span id="toast-text">-</span>
     </div>
 
-    <footer class="bg-slate-100 border-t border-slate-200 py-4 mt-12 text-center text-xs text-slate-500">
+    <footer class="border-t py-4 mt-12 text-center text-xs study-muted">
         <p>© 2026 EduDrill English. All Rights Reserved.</p>
     </footer>
 
@@ -618,10 +563,17 @@
           }
         ];
 
+        const UNIT_NAMES = [
+            '학년 묻고 답하기', '할 일 말하기', '함께할 일 제안하기',
+            '행사 날짜 묻고 답하기', '얼마나 자주 하는지 묻기', '크기 비교하기'
+        ];
+        const DRILL_NAMES = [
+            '', '단어 듣고 보기', '단어 쓰기', '빈칸 채우기', '문장 순서 맞추기', '문장 쓰기'
+        ];
         const DATA_VERSION = "2026-06-23_v1.1.0";
 
         let state = {
-            units: [], activeUnitId: null, activeDrillStep: 1, playList: [], playIndex: 0, score: 0,
+            units: [], activeUnitId: null, activeDrillStep: 1, playList: [], playIndex: 0, score: 0, missed: [], skipped: [], drillAnswered: false,
             activeItem: null, cardFlipped: false, unscrambleSelected: [], unscrambleRemaining: [], isTeacherAuthenticated: false
         };
 
@@ -631,6 +583,11 @@
         };
 
         const QUIZ_MAX_TIME = 20;
+
+        function escapeMarkup(text) {
+            const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
+            return text.replace(/[&<>"]/g, char => entities[char]);
+        }
 
         function cleanText(str, removePunctuation = true) {
             if (!str) return "";
@@ -652,7 +609,7 @@
                 if (e.key === 'Enter') verifyTeacherAccessPassword();
             });
             document.getElementById('dict-input').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') checkDictAnswer();
+                if (e.key === 'Enter' && !e.isComposing) checkDictAnswer();
             });
             document.getElementById('exam-input').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') submitExamAnswer();
@@ -660,9 +617,8 @@
         };
 
         function loadAllData() {
-            const savedVersion = localStorage.getItem('edudrill_version');
             const data = localStorage.getItem('edudrill_lessons');
-            if (savedVersion !== DATA_VERSION || !data) {
+            if (!data) {
                 state.units = JSON.parse(JSON.stringify(defaultLessons));
                 saveAllData();
                 localStorage.setItem('edudrill_version', DATA_VERSION);
@@ -692,10 +648,17 @@
             document.querySelectorAll('.view-section').forEach(sect => sect.classList.add('hidden'));
             const target = document.getElementById(`view-${viewId}`);
             if (target) target.classList.remove('hidden');
-            if (viewId === 'home') { renderHomeUnits(); clearInterval(quizState.timer); }
+            window.speechSynthesis?.cancel();
+            if (viewId !== 'quiz-play') clearInterval(quizState.timer);
+            if (viewId === 'home') renderHomeUnits();
             else if (viewId === 'teacher') { renderTeacherUnits(); if (state.activeUnitId) selectTeacherUnit(state.activeUnitId); }
             else if (viewId === 'drill-menu') { renderDrillMenu(); }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const heading = target?.querySelector('h1, h2');
+            if (heading) {
+                heading.tabIndex = -1;
+                heading.focus({ preventScroll: true });
+            }
+            window.scrollTo(0, 0);
         }
 
         function showToast(message) {
@@ -718,38 +681,60 @@
             const passwordInput = document.getElementById('teacher-access-password').value;
             if (passwordInput === 'EnglishStudy') {
                 state.isTeacherAuthenticated = true; closeTeacherAccessModal(); navigate('teacher');
-                showToast("교사 전용 인증에 성공했습니다.");
-            } else { showToast("⚠️ 패스워드가 올바르지 않습니다!"); }
+                showToast("단원 편집을 열었습니다.");
+            } else { showToast("⚠️ 편집 코드를 확인해 주세요."); }
+        }
+
+        function unitInfo(unit) {
+            const index = defaultLessons.findIndex(lesson => lesson.id === unit.id);
+            if (index < 0) return { number: '', title: unit.title, english: '' };
+            return { number: `${index + 1}과`, title: UNIT_NAMES[index], english: unit.title.replace(/^\d+\.\s*/, '') };
+        }
+
+        function makeStudyRow(marker, title, detail, onClick, { english = false, disabled = false } = {}) {
+            const row = document.createElement('button');
+            row.type = 'button';
+            row.className = 'study-row';
+            row.disabled = disabled;
+            row.onclick = onClick;
+            row.innerHTML = '<span class="study-number"></span><span><strong class="block"></strong><small class="block text-sm study-muted"></small></span><span aria-hidden="true">›</span>';
+            row.firstChild.textContent = marker;
+            row.firstChild.hidden = !marker;
+            row.querySelector('strong').textContent = title;
+            const secondary = row.querySelector('small');
+            secondary.textContent = detail;
+            secondary.hidden = !detail;
+            if (english) secondary.lang = 'en';
+            row.lastChild.hidden = disabled;
+            return row;
         }
 
         function renderHomeUnits() {
             const container = document.getElementById('unit-grid');
-            document.getElementById('unit-count-badge').innerText = `총 ${state.units.length}개 단원`;
-            container.innerHTML = '';
-            if (state.units.length === 0) { container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400">등록된 학습 단원이 없습니다.</div>`; return; }
+            container.replaceChildren();
+            if (state.units.length === 0) container.textContent = '등록된 단원이 없습니다.';
             state.units.forEach(unit => {
-                const card = document.createElement('div');
-                card.className = "bg-white p-5 rounded-2xl shadow-sm hover:shadow-md transition border border-slate-100 flex flex-col justify-between cursor-pointer hover:-translate-y-0.5 duration-200";
-                card.onclick = () => { state.activeUnitId = unit.id; navigate('drill-menu'); };
-                card.innerHTML = `
-                    <div>
-                        <h4 class="font-extrabold text-slate-800 text-base leading-snug mb-2">${unit.title}</h4>
-                        <div class="flex gap-2 text-xs text-slate-500 font-semibold mb-3">
-                            <span class="bg-slate-50 px-2 py-0.5 rounded border">단어 ${unit.words?unit.words.length:0}</span>
-                            <span class="bg-slate-50 px-2 py-0.5 rounded border">문장 ${unit.sentences?unit.sentences.length:0}</span>
-                        </div>
-                    </div>
-                    <div class="text-right text-xs font-bold text-indigo-600">드릴 트레이닝 진입 <i class="fa-solid fa-chevron-right text-[10px]"></i></div>`;
-                container.appendChild(card);
+                const info = unitInfo(unit);
+                container.appendChild(makeStudyRow(info.number, info.title, info.english, () => {
+                    state.activeUnitId = unit.id;
+                    navigate('drill-menu');
+                }, { english: Boolean(info.english) }));
             });
         }
 
         function renderDrillMenu() {
             const unit = state.units.find(u => u.id === state.activeUnitId);
-            if (!unit) { navigate('home'); return; }
-            document.getElementById('drill-menu-title').innerText = unit.title;
-            document.getElementById('stats-word-count').innerText = `${unit.words ? unit.words.length : 0}개`;
-            document.getElementById('stats-sentence-count').innerText = `${unit.sentences ? unit.sentences.length : 0}개`;
+            if (!unit) return;
+            const info = unitInfo(unit);
+            document.getElementById('drill-menu-title').textContent = [info.number, info.title].filter(Boolean).join(' · ');
+            document.getElementById('drill-menu-english').textContent = info.english;
+            const activities = document.getElementById('drill-activities');
+            activities.replaceChildren();
+            for (let step = 1; step < DRILL_NAMES.length; step++) {
+                const count = (step <= 2 ? unit.words : unit.sentences)?.length || 0;
+                const detail = count ? `${count}${step === 1 ? '개' : '문제'}` : '준비된 문제가 없어요';
+                activities.appendChild(makeStudyRow('', DRILL_NAMES[step], detail, () => startDrill(step), { disabled: count === 0 }));
+            }
         }
 
         // TTS 재생 속도 (받아쓰기 화면에서 변경 가능, 앱 전체에 적용)
@@ -787,8 +772,8 @@
                 const div = document.createElement('label');
                 div.className = "flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition";
                 div.innerHTML = `
-                    <input type="checkbox" value="${unit.id}" class="quiz-unit-cb rounded text-amber-500 focus:ring-amber-400 w-4 h-4" checked>
-                    <div class="text-sm font-bold text-slate-700 truncate flex-grow">${unit.title}</div>
+                    <input type="checkbox" value="${escapeMarkup(unit.id)}" class="quiz-unit-cb rounded text-amber-500 focus:ring-amber-400 w-4 h-4" checked>
+                    <div class="text-sm font-bold text-slate-700 truncate flex-grow">${escapeMarkup(unit.title)}</div>
                     <span class="text-xs bg-white border px-2 py-0.5 rounded text-slate-500 font-semibold shrink-0">문항 ${totalItems}개</span>`;
                 wrapper.appendChild(div);
             });
@@ -862,7 +847,7 @@
                 badge.innerText = "유형 3: 문장 빈칸 단어 추론하기";
                 const safeRegex = new RegExp(item.blank.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
                 const masked = item.en.replace(safeRegex, "_______");
-                questionDisplay.innerHTML = `<div class="text-sm text-slate-400 mb-1">뜻: ${item.ko}</div> <div>${masked}</div>`;
+                questionDisplay.innerHTML = `<div class="text-sm text-slate-400 mb-1">뜻: ${escapeMarkup(item.ko)}</div> <div>${escapeMarkup(masked)}</div>`;
                 correctAnswer = item.blank;
                 wrongPool = quizState.globalWords.map(w => w.en).concat(quizState.globalSentences.map(s => s.blank || ""));
             } else if (quizState.currentType === 4) {
@@ -1213,6 +1198,7 @@
         let dictState = { pool: [], index: 0, score: 0, replaysLeft: 2, current: null, answered: false };
 
         function openDictationSetup() {
+            document.getElementById('dict-setup-error').textContent = '';
             const wrapper = document.getElementById('dict-unit-checkboxes');
             wrapper.innerHTML = '';
             state.units.forEach(u => {
@@ -1220,8 +1206,8 @@
                 const div = document.createElement('label');
                 div.className = "flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition";
                 div.innerHTML = `
-                    <input type="checkbox" value="${u.id}" class="dict-unit-cb rounded text-blue-500 focus:ring-blue-400 w-4 h-4" checked>
-                    <div class="text-sm font-bold text-slate-700 truncate flex-grow">${u.title}</div>
+                    <input type="checkbox" value="${escapeMarkup(u.id)}" class="dict-unit-cb rounded text-blue-500 focus:ring-blue-400 w-4 h-4" checked>
+                    <div class="text-sm font-bold text-slate-700 truncate flex-grow">${escapeMarkup(u.title)}</div>
                     <span class="text-xs bg-white border px-2 py-0.5 rounded text-slate-500 font-semibold shrink-0">문장 ${u.sentences.length}개</span>`;
                 wrapper.appendChild(div);
             });
@@ -1233,22 +1219,29 @@
                 <div class="text-sm font-bold text-emerald-800 truncate flex-grow">🧭 길묻고 답하기 표현</div>
                 <span class="text-xs bg-white border px-2 py-0.5 rounded text-slate-500 font-semibold shrink-0">문장 ${directionDeck.sentences.length}개</span>`;
             wrapper.appendChild(dirDiv);
-            document.getElementById('dict-setup-modal').classList.remove('hidden');
+            document.getElementById('dict-setup-modal').showModal();
         }
-        function closeDictationSetup() { document.getElementById('dict-setup-modal').classList.add('hidden'); }
+        function closeDictationSetup() { document.getElementById('dict-setup-modal').close(); }
 
         function startDictationGame() {
             const checked = [];
             document.querySelectorAll('.dict-unit-cb').forEach(cb => { if (cb.checked) checked.push(cb.value); });
-            if (checked.length === 0) { showToast("최소 한 개 이상의 범위를 선택해야 합니다!"); return; }
+            if (checked.length === 0) {
+                document.getElementById('dict-setup-error').textContent = '받아쓸 단원을 하나 이상 골라 주세요.';
+                return;
+            }
             let pool = [];
             state.units.forEach(u => {
                 if (checked.includes(u.id) && u.sentences) u.sentences.forEach(s => pool.push({ en: s.en, ko: s.ko }));
             });
             if (checked.includes('__directions__')) directionDeck.sentences.forEach(s => pool.push({ en: s.en, ko: s.ko }));
-            if (pool.length === 0) { showToast("선택한 범위에 문장이 없습니다."); return; }
+            if (pool.length === 0) {
+                document.getElementById('dict-setup-error').textContent = '선택한 범위에 문장이 없어요.';
+                return;
+            }
             pool.sort(() => Math.random() - 0.5);
-            dictState = { pool, index: 0, score: 0, replaysLeft: 2, current: null, answered: false };
+            const limit = Number(document.getElementById('dict-limit').value);
+            dictState = { pool: limit ? pool.slice(0, limit) : pool, index: 0, score: 0, replaysLeft: 2, current: null, answered: false };
             closeDictationSetup();
             navigate('dictation-play');
             loadDictItem();
@@ -1260,35 +1253,51 @@
             dictState.replaysLeft = 2;
             dictState.answered = false;
             document.getElementById('dict-progress-text').innerText = `${dictState.index + 1} / ${dictState.pool.length}`;
-            document.getElementById('dict-replay-count').innerText = dictState.replaysLeft;
             document.getElementById('dict-input').value = '';
             document.getElementById('dict-input').disabled = false;
             const fb = document.getElementById('dict-feedback');
             fb.classList.add('hidden'); fb.innerText = '';
-            document.getElementById('dict-check-label').innerText = "확인하기";
-            setTimeout(() => speakText(dictState.current.en), 400);
-            document.getElementById('dict-input').focus();
+            document.getElementById('dict-check-label').innerText = '정답 확인';
+            dictState.hasListened = false;
+            document.getElementById('dict-hint').textContent = '';
+            const listen = document.getElementById('dict-listen');
+            listen.textContent = '소리 듣기';
+            listen.disabled = false;
+            listen.focus();
         }
 
-        function dictReplay() {
-            if (!dictState.current) return;
-            if (dictState.answered) { speakText(dictState.current.en); return; } // 채점 후에는 자유 재생
-            if (dictState.replaysLeft <= 0) { showToast("다시 듣기 기회를 모두 사용했어요! 들은 대로 적어 보세요."); return; }
-            dictState.replaysLeft--;
-            document.getElementById('dict-replay-count').innerText = dictState.replaysLeft;
+        function listenToDictation() {
+            if (!dictState.answered) {
+                if (dictState.hasListened) dictState.replaysLeft--;
+                dictState.hasListened = true;
+                const listen = document.getElementById('dict-listen');
+                listen.textContent = '다시 듣기 (' + dictState.replaysLeft + '회 남음)';
+                listen.disabled = dictState.replaysLeft === 0;
+                if (listen.disabled) document.getElementById('dict-input').focus();
+            }
             speakText(dictState.current.en);
         }
-        function dictHint() { if (dictState.current) showToast(`💡 뜻: ${dictState.current.ko}`); }
+        function dictHint() { if (dictState.current) document.getElementById('dict-hint').textContent = `뜻: ${dictState.current.ko}`; }
 
         function checkDictAnswer() {
             if (dictState.answered) { dictState.index++; loadDictItem(); return; }
             const val = cleanText(document.getElementById('dict-input').value, true);
             const correct = cleanText(dictState.current.en, true);
+            if (!val) {
+                const message = document.getElementById('dict-feedback');
+                message.className = 'study-answer is-wrong';
+                message.textContent = '들은 문장을 먼저 써 보세요.';
+                document.getElementById('dict-input').focus();
+                return;
+            }
             dictState.answered = true;
+            const listen = document.getElementById('dict-listen');
+            listen.disabled = false;
+            listen.textContent = '정답 듣기';
             document.getElementById('dict-input').disabled = true;
             const fb = document.getElementById('dict-feedback');
             fb.classList.remove('hidden');
-            if (val === correct && val !== "") {
+            if (val === correct) {
                 dictState.score++;
                 fb.className = "rounded-xl p-3 text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200";
                 fb.innerText = `⭕ 정답! "${dictState.current.en}"`;
@@ -1297,6 +1306,7 @@
                 fb.innerText = `❌ 정답 문장: "${dictState.current.en}"`;
             }
             document.getElementById('dict-check-label').innerText = "다음 문장";
+            document.getElementById('dict-check-btn').focus();
         }
 
         function finishDictation() {
@@ -1352,7 +1362,7 @@
                 examState.current = item; examState.qType = 'word';
                 examState.answerString = item.en; examState.stripPunct = false;
                 badge.innerText = "✏️ 단어 영작"; badge.className = "inline-block px-3 py-1 bg-amber-100 rounded-full text-xs font-bold text-amber-700";
-                q.innerHTML = `<div class="text-sm text-slate-400 font-bold mb-1">우리말 뜻</div><div>${item.ko}</div>`;
+                q.innerHTML = `<div class="text-sm text-slate-400 font-bold mb-1">우리말 뜻</div><div>${escapeMarkup(item.ko)}</div>`;
             } else {
                 const item = examState.sents[Math.floor(Math.random() * examState.sents.length)];
                 examState.current = item;
@@ -1369,13 +1379,13 @@
                 } else if (examState.qType === 'trans') {
                     examState.answerString = item.en; examState.stripPunct = true;
                     badge.innerText = "📝 한→영 영작"; badge.className = "inline-block px-3 py-1 bg-emerald-100 rounded-full text-xs font-bold text-emerald-700";
-                    q.innerHTML = `<div class="text-sm text-slate-400 font-bold mb-1">우리말 문장을 영어로!</div><div>"${item.ko}"</div>`;
+                    q.innerHTML = `<div class="text-sm text-slate-400 font-bold mb-1">우리말 문장을 영어로!</div><div>"${escapeMarkup(item.ko)}"</div>`;
                 } else {
                     examState.answerString = item.blank; examState.stripPunct = false;
                     const safeRegex = new RegExp(item.blank.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
                     const masked = item.en.replace(safeRegex, "_______");
                     badge.innerText = "🧩 빈칸 채우기"; badge.className = "inline-block px-3 py-1 bg-indigo-100 rounded-full text-xs font-bold text-indigo-700";
-                    q.innerHTML = `<div class="text-sm text-slate-400 font-bold mb-1">뜻: ${item.ko}</div><div>${masked}</div>`;
+                    q.innerHTML = `<div class="text-sm text-slate-400 font-bold mb-1">뜻: ${escapeMarkup(item.ko)}</div><div>${escapeMarkup(masked)}</div>`;
                 }
             }
             document.getElementById('exam-input').focus();
@@ -1444,197 +1454,223 @@
         function startDrill(step) {
             const unit = state.units.find(u => u.id === state.activeUnitId);
             if (!unit) return;
-            state.activeDrillStep = step; state.playIndex = 0; state.score = 0; state.playList = [];
-            if (step === 1 || step === 2) {
-                if (!unit.words || unit.words.length === 0) { showToast("등록된 단어가 없습니다!"); return; }
-                state.playList = unit.words.map(w => ({ ...w, type: 'word' }));
-            } else {
-                if (!unit.sentences || unit.sentences.length === 0) { showToast("등록된 핵심 문장이 없습니다!"); return; }
-                state.playList = unit.sentences.map(s => ({ sentenceEn: s.en, sentenceKo: s.ko, targetBlank: s.blank, type: 'sentence' }));
-            }
-            state.playList.sort(() => Math.random() - 0.5);
-            const labels = ["", "1단계: 플래시 카드", "2단계: 단어 타이핑", "3단계: 빈칸 채우기", "4단계: 문장 카드 결합", "5단계: 실전 영작문"];
-            document.getElementById('play-drill-badge').innerText = labels[step];
-            navigate('drill-play'); loadPlayItem();
+            const items = step <= 2 ? (unit.words || []) : (unit.sentences || []).map(sentence => ({
+                sentenceEn: sentence.en, sentenceKo: sentence.ko, targetBlank: sentence.blank
+            }));
+            state.activeDrillStep = step;
+            beginDrill([...items].sort(() => Math.random() - 0.5));
         }
 
-        function loadPlayItem() {
-            dismissFeedback();
-            if (state.playIndex >= state.playList.length) { finishDrill(); return; }
-            state.activeItem = state.playList[state.playIndex];
-            document.getElementById('play-progress-text').innerText = `${state.playIndex + 1} / ${state.playList.length}`;
-            document.getElementById('play-progress-bar').style.width = `${(state.playIndex / state.playList.length) * 100}%`;
-            document.getElementById('play-next-label').innerText = "확인하기";
-            document.getElementById('play-hint-btn').classList.add('hidden');
-            document.getElementById('play-speech-btn').classList.add('hidden');
+        function beginDrill(items) {
+            if (!items.length) return;
+            state.playList = items;
+            state.playIndex = 0;
+            state.score = 0;
+            state.missed = [];
+            state.skipped = [];
+            document.getElementById('play-drill-badge').textContent = DRILL_NAMES[state.activeDrillStep];
+            navigate('drill-play');
+            loadPlayItem();
+        }
+
+        function leaveDrill() {
+            if ((state.playIndex === 0 && !state.drillAnswered) || confirm('연습을 끝낼까요? 현재 결과는 저장되지 않아요.')) {
+                navigate('drill-menu');
+            }
+        }
+
+        function loadPlayItem(focus = false) {
+            if (state.playIndex >= state.playList.length) {
+                finishDrill();
+                return;
+            }
+            const item = state.activeItem = state.playList[state.playIndex];
+            const step = state.activeDrillStep;
+            state.drillAnswered = false;
+            document.getElementById('play-progress-text').textContent = `${state.playIndex + 1} / ${state.playList.length}`;
+            document.getElementById('play-progress-bar').style.width = `${(state.playIndex + 1) / state.playList.length * 100}%`;
+            document.getElementById('play-next-btn').textContent = step === 1 ? '다음 단어' : '정답 확인';
+            document.getElementById('play-skip-btn').hidden = step === 1;
+            document.getElementById('play-hint-btn').classList.toggle('hidden', ![2, 3, 5].includes(step));
+            document.getElementById('play-speech-btn').classList.toggle('hidden', step !== 1);
+            document.getElementById('play-feedback').className = 'study-answer hidden';
+            document.getElementById('play-feedback').replaceChildren();
+            document.getElementById('play-hint-text').textContent = '';
+            document.getElementById('play-error').textContent = '';
             const area = document.getElementById('play-interactive-area');
-            area.innerHTML = '';
-            area.className = "flex-grow flex flex-col justify-center items-center py-4 w-full";
-            if (state.activeDrillStep === 1) renderStep1(area);
-            else if (state.activeDrillStep === 2) renderStep2(area);
-            else if (state.activeDrillStep === 3) renderStep3(area);
-            else if (state.activeDrillStep === 4) renderStep4(area);
-            else if (state.activeDrillStep === 5) renderStep5(area);
-            if (state.activeDrillStep === 1) setTimeout(speakActiveItem, 300);
+            if (step === 1) {
+                area.innerHTML = '<p class="text-3xl font-bold" lang="en"></p><button type="button" class="study-secondary mt-4" aria-expanded="false" aria-controls="play-word-meaning">뜻 보기</button><p id="play-word-meaning" class="text-lg font-semibold mt-3" hidden></p>';
+                area.firstChild.textContent = item.en;
+                const meaning = area.lastChild;
+                meaning.textContent = item.ko;
+                area.querySelector('button').onclick = event => {
+                    meaning.hidden = !meaning.hidden;
+                    event.currentTarget.textContent = meaning.hidden ? '뜻 보기' : '뜻 숨기기';
+                    event.currentTarget.setAttribute('aria-expanded', String(!meaning.hidden));
+                };
+            } else {
+                renderDrillQuestion(area, step, item);
+            }
+            if (focus) {
+                (area.querySelector('input, button') || document.getElementById('play-drill-badge')).focus();
+            }
+        }
+
+        function renderDrillQuestion(area, step, item) {
+            const instructions = {
+                2: '우리말 뜻을 보고 영어 단어를 써 보세요.',
+                3: '빈칸에 들어갈 말을 써 보세요.',
+                4: '단어를 순서대로 눌러 문장을 만드세요.',
+                5: '우리말 뜻을 보고 영어 문장을 써 보세요.'
+            };
+            area.innerHTML = '<p class="text-sm study-muted" id="play-instruction"></p><p class="text-2xl font-bold my-3" id="play-prompt"></p>';
+            area.firstChild.textContent = instructions[step];
+            area.lastChild.textContent = step === 2 ? item.ko : item.sentenceKo;
+            if (step === 3) {
+                const sentence = document.createElement('p');
+                const escaped = item.targetBlank.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const pattern = new RegExp(`(?<![A-Za-z])${escaped}(?![A-Za-z])`, 'i');
+                sentence.textContent = item.sentenceEn.replace(pattern.test(item.sentenceEn) ? pattern : new RegExp(escaped, 'i'), '_____');
+                sentence.className = 'font-semibold mb-3';
+                sentence.lang = 'en';
+                area.appendChild(sentence);
+            }
+            if (step === 4) {
+                state.unscrambleSelected = [];
+                state.unscrambleRemaining = item.sentenceEn.replace(/[.,?!]/g, '').trim().split(/\s+/).sort(() => Math.random() - 0.5);
+                area.insertAdjacentHTML('beforeend', '<div class="space-y-2" lang="en"><div id="unscramble-selected-box" class="flex min-h-14 flex-wrap gap-2 rounded-lg border p-2"></div><div id="unscramble-remaining-box" class="flex flex-wrap gap-2 rounded-lg border border-dashed p-2"></div></div>');
+                drawUnscramblePiles();
+                return;
+            }
+            const input = document.createElement(step === 5 ? 'textarea' : 'input');
+            input.id = 'play-answer';
+            input.lang = 'en';
+            input.className = 'block w-full min-h-12 rounded-lg border border-slate-400 px-3 py-2 text-lg';
+            input.setAttribute('aria-label', '영어 답');
+            input.setAttribute('aria-describedby', 'play-instruction play-prompt play-error');
+            input.autocapitalize = 'none';
+            input.autocomplete = 'off';
+            input.setAttribute('autocorrect', 'off');
+            input.spellcheck = false;
+            input.addEventListener('input', () => {
+                input.removeAttribute('aria-invalid');
+                document.getElementById('play-error').textContent = '';
+            });
+            input.addEventListener('keydown', event => {
+                if (event.key === 'Enter' && !event.isComposing && !event.shiftKey) {
+                    event.preventDefault();
+                    checkOrNextItem();
+                }
+            });
+            area.appendChild(input);
         }
 
         function skipItem() {
-            state.playList.push({...state.activeItem});
-            state.playIndex++; loadPlayItem();
-            showToast("다시 트레이닝할 수 있도록 해당 카드를 맨 뒤로 보냈습니다! 🔁");
-        }
-
-        function dismissFeedback() {
-            document.getElementById('play-feedback-banner').className = "absolute inset-x-0 bottom-0 py-3 px-6 rounded-b-3xl text-center font-bold text-white transition-all duration-300 transform translate-y-full opacity-0 z-10 flex justify-between items-center";
-        }
-        function showFeedbackBanner(isCorrect, message) {
-            const banner = document.getElementById('play-feedback-banner');
-            document.getElementById('play-feedback-text').innerText = message;
-            banner.className = `absolute inset-x-0 bottom-0 py-4 px-6 rounded-b-3xl text-center font-bold text-white transition-all duration-300 transform translate-y-0 opacity-100 z-10 flex justify-between items-center ${isCorrect ? 'bg-emerald-500' : 'bg-rose-500'}`;
-            document.getElementById('play-next-label').innerText = "다음 문제";
+            state.skipped.push(state.activeItem);
+            state.playIndex++;
+            loadPlayItem(true);
         }
 
         function checkOrNextItem() {
-            const label = document.getElementById('play-next-label').innerText;
-            if (label === "다음 문제") { state.playIndex++; loadPlayItem(); return; }
-            if (state.activeDrillStep === 1) {
-                state.score += 100; showFeedbackBanner(true, `단어 암기 체크 완료: ${state.activeItem.en}`);
-            } else if (state.activeDrillStep === 2) {
-                const val = cleanText(document.getElementById('step2-input').value, false);
-                const correct = cleanText(state.activeItem.en, false);
-                if (val === correct) { state.score += 100; speakActiveItem(); showFeedbackBanner(true, `정답입니다! [ ${state.activeItem.en} ]`); }
-                else { showFeedbackBanner(false, `오답입니다. 정답은 [ ${state.activeItem.en} ]`); }
-            } else if (state.activeDrillStep === 3) {
-                const val = cleanText(document.getElementById('step3-input').value, false);
-                const correct = cleanText(state.activeItem.targetBlank, false);
-                if (val === correct) { state.score += 100; speakActiveItem(); showFeedbackBanner(true, `정답입니다!`); }
-                else { showFeedbackBanner(false, `오답입니다. 빈칸 단어는 [ ${state.activeItem.targetBlank} ]`); }
-            } else if (state.activeDrillStep === 4) {
-                const userString = cleanText(state.unscrambleSelected.join(' '), true);
-                const correctString = cleanText(state.activeItem.sentenceEn, true);
-                if (userString === correctString) { state.score += 100; speakActiveItem(); showFeedbackBanner(true, `완벽한 문장 결합입니다!`); }
-                else { showFeedbackBanner(false, `순서가 틀렸습니다. 정답: "${state.activeItem.sentenceEn}"`); }
-            } else if (state.activeDrillStep === 5) {
-                const val = cleanText(document.getElementById('step5-textarea').value, true);
-                const correct = cleanText(state.activeItem.sentenceEn, true);
-                if (val === correct) { state.score += 100; speakActiveItem(); showFeedbackBanner(true, `우수한 통영작 성공!`); }
-                else { showFeedbackBanner(false, `오답입니다. 정답: "${state.activeItem.sentenceEn}"`); }
+            const step = state.activeDrillStep;
+            if (state.drillAnswered || step === 1) {
+                state.playIndex++;
+                loadPlayItem(true);
+                return;
             }
-        }
-
-        function renderStep1(parent) {
+            const item = state.activeItem;
+            const input = document.getElementById('play-answer');
+            const answer = input ? input.value.trim() : state.unscrambleSelected.join(' ');
+            if (!answer) {
+                document.getElementById('play-error').textContent = input ? '답을 먼저 써 보세요.' : '단어를 먼저 골라 보세요.';
+                input?.setAttribute('aria-invalid', 'true');
+                input?.focus();
+                return;
+            }
+            const expected = step === 2 ? item.en : step === 3 ? item.targetBlank : item.sentenceEn;
+            const correct = cleanText(answer, step >= 4) === cleanText(expected, step >= 4);
+            if (correct) state.score++;
+            else state.missed.push(item);
+            state.drillAnswered = true;
+            const feedback = document.getElementById('play-feedback');
+            feedback.classList.remove('hidden');
+            feedback.classList.toggle('is-wrong', !correct);
+            feedback.innerHTML = '<strong></strong><p class="mt-1"></p><p></p>';
+            feedback.firstChild.textContent = correct ? '정답이에요.' : '정답을 확인해 보세요.';
+            if (!correct) feedback.children[1].textContent = `내 답: ${answer}`;
+            feedback.lastChild.textContent = `정답: ${expected}`;
+            if (input) input.readOnly = true;
+            document.querySelectorAll('#play-interactive-area button').forEach(button => button.disabled = true);
+            document.getElementById('play-error').textContent = '';
             document.getElementById('play-speech-btn').classList.remove('hidden');
-            const wrapper = document.createElement('div');
-            wrapper.className = "perspective-1000 w-full max-w-sm h-52 cursor-pointer";
-            const inner = document.createElement('div');
-            inner.className = "w-full h-full duration-500 preserve-3d relative rounded-3xl border shadow-sm";
-            wrapper.onclick = () => { state.cardFlipped = !state.cardFlipped; if(state.cardFlipped) inner.classList.add('rotate-y-180'); else inner.classList.remove('rotate-y-180'); };
-            inner.innerHTML = `
-                <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-indigo-600 rounded-3xl backface-hidden text-white flex flex-col justify-between p-6 text-center">
-                    <span class="text-[10px] uppercase font-bold tracking-widest text-indigo-200">English Word</span>
-                    <div class="text-3xl font-black">${state.activeItem.en}</div>
-                    <div class="text-[11px] text-indigo-200"><i class="fa-solid fa-rotate"></i> 카드를 누르면 뜻이 나옵니다</div>
-                </div>
-                <div class="absolute inset-0 bg-slate-800 rounded-3xl backface-hidden text-white rotate-y-180 flex flex-col justify-between p-6 text-center">
-                    <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400">우리말 뜻</span>
-                    <div class="text-2xl font-bold text-amber-300">${state.activeItem.ko}</div>
-                    <div class="text-[11px] text-slate-400">확인한 뒤 하단의 버튼을 누르세요</div>
-                </div>`;
-            wrapper.appendChild(inner); parent.appendChild(wrapper);
-        }
-
-        function renderStep2(parent) {
-            document.getElementById('play-hint-btn').classList.remove('hidden');
-            document.getElementById('play-speech-btn').classList.remove('hidden');
-            parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-sm space-y-4";
-            parent.innerHTML = `
-                <div class="text-center"><span class="text-xs text-slate-400 font-bold">우리말 뜻</span><h3 class="text-2xl font-black text-slate-900">${state.activeItem.ko}</h3></div>
-                <input type="text" id="step2-input" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" lang="en" placeholder="영어 스펠링 타이핑" class="w-full text-center text-lg font-bold py-3 border-2 rounded-xl focus:outline-none focus:border-indigo-500">`;
-            document.getElementById('step2-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkOrNextItem(); });
-        }
-
-        function renderStep3(parent) {
-            document.getElementById('play-hint-btn').classList.remove('hidden');
-            document.getElementById('play-speech-btn').classList.remove('hidden');
-            parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-md space-y-4";
-            const safeRegex = new RegExp(state.activeItem.targetBlank.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
-            const masked = state.activeItem.sentenceEn.replace(safeRegex, "_______");
-            parent.innerHTML = `
-                <div class="text-center"><span class="text-xs text-slate-400 font-bold">한국어 번역</span><h3 class="text-base font-bold text-slate-800">"${state.activeItem.sentenceKo}"</h3></div>
-                <div class="bg-indigo-50/50 p-4 rounded-xl border text-center w-full font-semibold text-indigo-900">${masked}</div>
-                <input type="text" id="step3-input" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" lang="en" placeholder="빈칸 채우기 단어" class="w-full text-center py-2.5 border-2 rounded-xl focus:outline-none">`;
-            document.getElementById('step3-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkOrNextItem(); });
-        }
-
-        function renderStep4(parent) {
-            document.getElementById('play-speech-btn').classList.remove('hidden');
-            parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-xl space-y-4";
-            const originalWords = state.activeItem.sentenceEn.replace(/[.,?!]/g, "").split(/\s+/).filter(w => w.trim() !== "");
-            state.unscrambleSelected = [];
-            state.unscrambleRemaining = [...originalWords].sort(() => Math.random() - 0.5);
-            parent.innerHTML = `
-                <div class="text-center"><h3 class="text-base font-bold text-slate-800">"${state.activeItem.sentenceKo}"</h3></div>
-                <div class="w-full min-h-[60px] p-3 bg-slate-50 border rounded-xl flex flex-wrap gap-1.5" id="unscramble-selected-box"></div>
-                <div class="w-full p-3 border border-dashed rounded-xl flex flex-wrap gap-2 justify-center" id="unscramble-remaining-box"></div>`;
-            drawUnscramblePiles();
+            document.getElementById('play-skip-btn').hidden = true;
+            const next = document.getElementById('play-next-btn');
+            next.textContent = state.playIndex + 1 === state.playList.length ? '결과 보기' : '다음 문제';
+            next.focus();
         }
 
         function drawUnscramblePiles() {
             const sBox = document.getElementById('unscramble-selected-box');
             const rBox = document.getElementById('unscramble-remaining-box');
             sBox.innerHTML = ''; rBox.innerHTML = '';
-            if(state.unscrambleSelected.length===0) sBox.innerHTML = '<span class="text-xs text-slate-400">단어 블록을 아래에서 순서대로 누르세요...</span>';
             state.unscrambleSelected.forEach((word, idx) => {
                 const b = document.createElement('button');
-                b.className = "px-2.5 py-1 bg-indigo-600 text-white font-semibold text-xs rounded-lg shadow-sm";
+                b.className = "study-primary";
                 b.innerText = word;
-                b.onclick = () => { state.unscrambleSelected.splice(idx,1); state.unscrambleRemaining.push(word); drawUnscramblePiles(); };
+                b.onclick = () => { state.unscrambleSelected.splice(idx,1); state.unscrambleRemaining.push(word); drawUnscramblePiles(); rBox.lastChild.focus(); };
                 sBox.appendChild(b);
             });
             state.unscrambleRemaining.forEach((word, idx) => {
                 const b = document.createElement('button');
-                b.className = "px-2.5 py-1.5 bg-white border rounded-lg text-xs font-semibold hover:border-indigo-400 transition shadow-sm";
+                b.className = "study-secondary";
                 b.innerText = word;
-                b.onclick = () => { state.unscrambleRemaining.splice(idx,1); state.unscrambleSelected.push(word); drawUnscramblePiles(); };
+                b.onclick = () => { state.unscrambleRemaining.splice(idx,1); state.unscrambleSelected.push(word); drawUnscramblePiles(); (rBox.children[idx] || rBox.lastChild || sBox.lastChild).focus(); document.getElementById('play-error').textContent = ''; };
                 rBox.appendChild(b);
             });
         }
 
-        function renderStep5(parent) {
-            document.getElementById('play-hint-btn').classList.remove('hidden');
-            document.getElementById('play-speech-btn').classList.remove('hidden');
-            parent.className = "flex-grow flex flex-col justify-center items-center py-4 w-full max-w-md space-y-3";
-            parent.innerHTML = `
-                <div class="text-center"><h3 class="text-base font-bold text-slate-800">"${state.activeItem.sentenceKo}"</h3></div>
-                <textarea id="step5-textarea" rows="2" autocapitalize="none" autocorrect="off" spellcheck="false" lang="en" placeholder="전체 영어 문장 입력" class="w-full p-3 border-2 rounded-xl text-center font-semibold"></textarea>`;
-        }
-
         function showHelpHint() {
-            if (!state.activeItem) return;
-            if (state.activeDrillStep === 2) showToast(`두 글자 힌트: "${state.activeItem.en.substring(0,2)}..."`);
-            else if (state.activeDrillStep === 3) showToast(`빈칸 정답 글자수: 총 ${state.activeItem.targetBlank.length}글자`);
-            else if (state.activeDrillStep === 5) showToast(`첫 단어 시작: "${state.activeItem.sentenceEn.split(' ')[0]}..."`);
+            const item = state.activeItem;
+            const step = state.activeDrillStep;
+            const hint = step === 2 ? `첫 글자: ${item.en.charAt(0)}`
+                : step === 3 ? `빈칸: ${item.targetBlank.length}글자`
+                : `첫 단어: ${item.sentenceEn.split(' ')[0]}`;
+            document.getElementById('play-hint-text').textContent = hint;
         }
 
         function finishDrill() {
+            const unit = state.units.find(u => u.id === state.activeUnitId);
+            const count = state.playList.length;
+            const skipped = state.skipped.length;
+            const retry = document.getElementById('result-retry');
+            document.getElementById('result-unit-name').textContent = `${unit?.title || ''} · ${DRILL_NAMES[state.activeDrillStep]}`;
+            document.getElementById('result-score').textContent = state.activeDrillStep === 1
+                ? `단어 ${count}개를 살펴봤어요.` : `${count}문제 중 ${state.score}문제 정답`;
+            document.getElementById('result-skipped').textContent = skipped ? `건너뛴 문제 ${skipped}개` : '';
+            retry.classList.toggle('hidden', state.missed.length + skipped === 0);
+            retry.textContent = skipped ? '틀리거나 건너뛴 문제 다시 풀기' : `틀린 ${state.missed.length}문제 다시 풀기`;
             navigate('drill-result');
-            const labels = ["", "1단계: 플래시 카드", "2단계: 단어 타이핑", "3단계: 빈칸 채우기", "4단계: 문장 카드 결합", "5단계: 실전 영작문"];
-            document.getElementById('result-drill-name').innerText = labels[state.activeDrillStep];
-            const u = state.units.find(x => x.id === state.activeUnitId);
-            document.getElementById('result-unit-name').innerText = u ? u.title : "";
-            document.getElementById('result-total-count').innerText = `${state.playList.length}문항 전체 완주`;
-            document.getElementById('result-score').innerText = `${Math.round((state.score/(state.playList.length*100))*100)}% 만족`;
         }
 
-        // ================= TEACHER DASHBOARD BACKEND LOGIC =================
+        function retryDrill() {
+            beginDrill([...state.missed, ...state.skipped]);
+        }
+
         function renderTeacherUnits() {
-            const list = document.getElementById('teacher-unit-list'); list.innerHTML = '';
+            const list = document.getElementById('teacher-unit-list');
+            list.replaceChildren();
+            if (!state.units.some(unit => unit.id === state.activeUnitId)) {
+                document.getElementById('teacher-no-unit-selected').classList.remove('hidden');
+                document.getElementById('teacher-workspace').classList.add('hidden');
+                document.getElementById('teacher-delete-unit-btn').classList.add('hidden');
+                document.getElementById('teacher-active-unit-title').textContent = '단원을 선택해 주세요';
+            }
             if(state.units.length===0) { list.innerHTML='<div class="text-center text-xs py-4 text-slate-400">단원이 비어 있습니다.</div>'; return; }
             state.units.forEach(unit => {
                 const btn = document.createElement('button');
                 btn.className = `w-full text-left px-3 py-2.5 rounded-lg text-xs font-bold transition flex justify-between items-center ${state.activeUnitId === unit.id ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600':'text-slate-600'}`;
                 btn.onclick = () => selectTeacherUnit(unit.id);
-                btn.innerHTML = `<span class="truncate pr-2">${unit.title}</span><i class="fa-solid fa-chevron-right text-[9px] opacity-40"></i>`;
+                btn.innerHTML = `<span class="truncate pr-2">${escapeMarkup(unit.title)}</span><i class="fa-solid fa-chevron-right text-[9px] opacity-40"></i>`;
                 list.appendChild(btn);
             });
         }
@@ -1677,7 +1713,7 @@
             if(!unit.words || unit.words.length===0) { tbody.innerHTML='<tr><td colspan="3" class="text-center text-xs p-4 text-slate-400">데이터 없음</td></tr>'; return; }
             unit.words.forEach((w, i) => {
                 const tr = document.createElement('tr'); tr.className = "border-b";
-                tr.innerHTML = `<td class="p-2 font-bold">${w.en}</td><td class="p-2">${w.ko}</td><td class="p-2 text-right"><button onclick="deleteWord(${i})" class="text-rose-500 hover:text-rose-700 transition"><i class="fa-solid fa-trash-can"></i></button></td>`;
+                tr.innerHTML = `<td class="p-2 font-bold">${escapeMarkup(w.en)}</td><td class="p-2">${escapeMarkup(w.ko)}</td><td class="p-2 text-right"><button onclick="deleteWord(${i})" aria-label="단어 삭제" class="text-rose-500 hover:text-rose-700 transition"><i class="fa-solid fa-trash-can"></i></button></td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -1699,7 +1735,7 @@
             if(!unit.sentences || unit.sentences.length===0) { tbody.innerHTML='<tr><td colspan="3" class="text-center text-xs p-4 text-slate-400">데이터 없음</td></tr>'; return; }
             unit.sentences.forEach((s, i) => {
                 const tr = document.createElement('tr'); tr.className = "border-b";
-                tr.innerHTML = `<td class="p-2 font-semibold text-xs">${s.en}</td><td class="p-2 text-xs">${s.ko} (${s.blank})</td><td class="p-2 text-right"><button onclick="deleteSentence(${i})" class="text-rose-500 hover:text-rose-700 transition"><i class="fa-solid fa-trash-can"></i></button></td>`;
+                tr.innerHTML = `<td class="p-2 font-semibold text-xs">${escapeMarkup(s.en)}</td><td class="p-2 text-xs">${escapeMarkup(s.ko)} (${escapeMarkup(s.blank)})</td><td class="p-2 text-right"><button onclick="deleteSentence(${i})" aria-label="문장 삭제" class="text-rose-500 hover:text-rose-700 transition"><i class="fa-solid fa-trash-can"></i></button></td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -1731,14 +1767,35 @@
             const url = URL.createObjectURL(blob); const a = document.createElement('a');
             a.href = url; a.download = `edudrill_lessons_${new Date().toISOString().slice(0,10)}.json`; a.click();
         }
+        function isLessonFile(units) {
+            const hasText = value => typeof value === 'string' && value.trim() !== '';
+            return Array.isArray(units) && units.every(unit => unit && hasText(unit.id) && hasText(unit.title)
+                && Array.isArray(unit.words) && unit.words.every(word => word && hasText(word.en) && hasText(word.ko))
+                && Array.isArray(unit.sentences) && unit.sentences.every(sentence =>
+                    sentence && hasText(sentence.en) && hasText(sentence.ko) && hasText(sentence.blank)))
+                && new Set(units.map(unit => unit.id)).size === units.length;
+        }
+
         function importDataFromFile(event) {
             const file = event.target.files[0]; if(!file) return;
             const r = new FileReader();
             r.onload = function(e) {
                 try {
                     const parsed = JSON.parse(e.target.result);
-                    if(Array.isArray(parsed)) { state.units = parsed; saveAllData(); loadAllData(); showToast("데이터 병합 로드 성공!"); }
-                } catch(err) { showToast("문법 에러 파일입니다."); }
+                    if (!isLessonFile(parsed)) {
+                        showToast('EduDrill 단원 파일인지 확인해 주세요.');
+                        return;
+                    }
+                    const incoming = parsed.map(unit => unit.title).join('\n') || '단원 없음';
+                    const current = state.units.map(unit => unit.title).join('\n') || '단원 없음';
+                    if (!confirm(`현재 단원\n${current}\n\n가져올 단원\n${incoming}\n\n현재 단원을 파일 내용으로 바꿀까요? 기존 자료는 먼저 내보내세요.`)) return;
+                    state.units = parsed;
+                    state.activeUnitId = null;
+                    saveAllData();
+                    loadAllData();
+                    navigate('teacher');
+                    showToast('단원 파일을 가져왔습니다.');
+                } catch(err) { showToast('파일을 읽을 수 없습니다.'); }
             };
             r.readAsText(file); event.target.value = '';
         }
