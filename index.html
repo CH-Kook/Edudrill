@@ -40,7 +40,7 @@
         .study-number {
             flex: none; min-width: 2.7rem; text-align: center; padding: .4rem;
             background: #e8f2e9; color: var(--accent); border-radius: 7px;
-            font-size: .875rem; font-weight: 700;
+            font-size: .875rem; font-weight: 700; white-space: nowrap;
         }
         .study-panel { padding: clamp(1rem, 4vw, 2rem); background: #fff; border: 1px solid var(--line); border-radius: 16px; }
         .study-primary { background: var(--accent); color: #fff; border-radius: 9px; padding: .7rem 1rem; min-height: 44px; font-weight: 700; }
@@ -302,7 +302,6 @@
                 <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> 단원 목록
             </button>
             <h2 id="drill-menu-title" class="study-title" tabindex="-1"></h2>
-            <p id="drill-menu-english" class="study-muted mt-1" lang="en"></p>
             <div id="drill-activities" class="study-list mt-5"></div>
         </section>
 
@@ -563,10 +562,6 @@
           }
         ];
 
-        const UNIT_NAMES = [
-            '학년 묻고 답하기', '할 일 말하기', '함께할 일 제안하기',
-            '행사 날짜 묻고 답하기', '얼마나 자주 하는지 묻기', '크기 비교하기'
-        ];
         const DRILL_NAMES = [
             '', '단어 듣고 보기', '단어 쓰기', '빈칸 채우기', '문장 순서 맞추기', '문장 쓰기'
         ];
@@ -687,8 +682,13 @@
 
         function unitInfo(unit) {
             const index = defaultLessons.findIndex(lesson => lesson.id === unit.id);
-            if (index < 0) return { number: '', title: unit.title, english: '' };
-            return { number: `${index + 1}과`, title: UNIT_NAMES[index], english: unit.title.replace(/^\d+\.\s*/, '') };
+            if (index < 0) return { number: '', title: unit.title };
+            return { number: `Lesson ${index + 1}`, title: unit.title.replace(/^\d+\.\s*/, '') };
+        }
+
+        function unitLabel(unit) {
+            const { number, title } = unitInfo(unit);
+            return number ? `${number} · ${title}` : title;
         }
 
         function makeStudyRow(marker, title, detail, onClick, { english = false, disabled = false } = {}) {
@@ -700,11 +700,15 @@
             row.innerHTML = '<span class="study-number"></span><span><strong class="block"></strong><small class="block text-sm study-muted"></small></span><span aria-hidden="true">›</span>';
             row.firstChild.textContent = marker;
             row.firstChild.hidden = !marker;
-            row.querySelector('strong').textContent = title;
+            const heading = row.querySelector('strong');
+            heading.textContent = title;
             const secondary = row.querySelector('small');
             secondary.textContent = detail;
             secondary.hidden = !detail;
-            if (english) secondary.lang = 'en';
+            if (english) {
+                row.firstChild.lang = 'en';
+                heading.lang = 'en';
+            }
             row.lastChild.hidden = disabled;
             return row;
         }
@@ -715,10 +719,10 @@
             if (state.units.length === 0) container.textContent = '등록된 단원이 없습니다.';
             state.units.forEach(unit => {
                 const info = unitInfo(unit);
-                container.appendChild(makeStudyRow(info.number, info.title, info.english, () => {
+                container.appendChild(makeStudyRow(info.number, info.title, '', () => {
                     state.activeUnitId = unit.id;
                     navigate('drill-menu');
-                }, { english: Boolean(info.english) }));
+                }, { english: Boolean(info.number) }));
             });
         }
 
@@ -726,8 +730,10 @@
             const unit = state.units.find(u => u.id === state.activeUnitId);
             if (!unit) return;
             const info = unitInfo(unit);
-            document.getElementById('drill-menu-title').textContent = [info.number, info.title].filter(Boolean).join(' · ');
-            document.getElementById('drill-menu-english').textContent = info.english;
+            const heading = document.getElementById('drill-menu-title');
+            heading.textContent = unitLabel(unit);
+            if (info.number) heading.lang = 'en';
+            else heading.removeAttribute('lang');
             const activities = document.getElementById('drill-activities');
             activities.replaceChildren();
             for (let step = 1; step < DRILL_NAMES.length; step++) {
@@ -773,7 +779,7 @@
                 div.className = "flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition";
                 div.innerHTML = `
                     <input type="checkbox" value="${escapeMarkup(unit.id)}" class="quiz-unit-cb rounded text-amber-500 focus:ring-amber-400 w-4 h-4" checked>
-                    <div class="text-sm font-bold text-slate-700 truncate flex-grow">${escapeMarkup(unit.title)}</div>
+                    <div class="text-sm font-bold text-slate-700 truncate flex-grow">${escapeMarkup(unitLabel(unit))}</div>
                     <span class="text-xs bg-white border px-2 py-0.5 rounded text-slate-500 font-semibold shrink-0">문항 ${totalItems}개</span>`;
                 wrapper.appendChild(div);
             });
@@ -1207,7 +1213,7 @@
                 div.className = "flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition";
                 div.innerHTML = `
                     <input type="checkbox" value="${escapeMarkup(u.id)}" class="dict-unit-cb rounded text-blue-500 focus:ring-blue-400 w-4 h-4" checked>
-                    <div class="text-sm font-bold text-slate-700 truncate flex-grow">${escapeMarkup(u.title)}</div>
+                    <div class="text-sm font-bold text-slate-700 truncate flex-grow">${escapeMarkup(unitLabel(u))}</div>
                     <span class="text-xs bg-white border px-2 py-0.5 rounded text-slate-500 font-semibold shrink-0">문장 ${u.sentences.length}개</span>`;
                 wrapper.appendChild(div);
             });
@@ -1643,7 +1649,7 @@
             const count = state.playList.length;
             const skipped = state.skipped.length;
             const retry = document.getElementById('result-retry');
-            document.getElementById('result-unit-name').textContent = `${unit?.title || ''} · ${DRILL_NAMES[state.activeDrillStep]}`;
+            document.getElementById('result-unit-name').textContent = [unit ? unitLabel(unit) : '', DRILL_NAMES[state.activeDrillStep]].filter(Boolean).join(' · ');
             document.getElementById('result-score').textContent = state.activeDrillStep === 1
                 ? `단어 ${count}개를 살펴봤어요.` : `${count}문제 중 ${state.score}문제 정답`;
             document.getElementById('result-skipped').textContent = skipped ? `건너뛴 문제 ${skipped}개` : '';
