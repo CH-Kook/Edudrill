@@ -436,7 +436,7 @@
     </footer>
 
     <script>
-        const defaultLessons = [
+        const firstSemesterLessons = [
           {
             "id": "unit-1781583413185",
             "title": "1. What grade are you in?",
@@ -562,10 +562,136 @@
           }
         ];
 
+        const secondSemesterLessons = [
+          {
+            id: "lesson-7",
+            title: "7. How Can I Get to the Police Station?",
+            words: [
+              { en: "airplane", ko: "비행기" }, { en: "ask", ko: "요청하다" }, { en: "behind", ko: "~ 뒤에" },
+              { en: "building", ko: "건물" }, { en: "bus", ko: "버스" }, { en: "bus stop", ko: "버스 정거장, 버스 정류장" },
+              { en: "by", ko: "~로" }, { en: "gallery", ko: "미술관" }, { en: "hospital", ko: "병원" },
+              { en: "in front of", ko: "~ 앞에" }, { en: "line", ko: "선" }, { en: "miss", ko: "놓치다" },
+              { en: "police station", ko: "경찰서" }, { en: "station", ko: "역" }, { en: "subway", ko: "지하철" }
+            ],
+            sentences: [
+              { en: "How can I get to the police station?", ko: "경찰서에 어떻게 가나요?", blank: "police station" },
+              { en: "You can get there by subway.", ko: "지하철을 타고 갈 수 있어요.", blank: "by subway" },
+              { en: "It’s in front of the bank.", ko: "그곳은 은행 앞에 있어요.", blank: "in front of" },
+              { en: "How can I get to the hospital?", ko: "병원에 어떻게 가나요?", blank: "hospital" },
+              { en: "You can get there by bus.", ko: "버스를 타고 갈 수 있어요.", blank: "by bus" },
+              { en: "It’s behind the bookstore.", ko: "그곳은 서점 뒤에 있어요.", blank: "behind" }
+            ]
+          },
+          {
+            id: "lesson-8",
+            title: "8. I Want to Be a Drone Pilot",
+            words: [
+              { en: "area", ko: "공간, 구역" }, { en: "computer programmer", ko: "컴퓨터 프로그래머" },
+              { en: "dinosaur", ko: "공룡" }, { en: "end", ko: "끝, 마지막" }, { en: "movie director", ko: "영화감독" },
+              { en: "newspaper", ko: "신문" }, { en: "safe", ko: "안전한" }, { en: "story", ko: "이야기" }
+            ],
+            sentences: [
+              { en: "What do you want to be?", ko: "너는 무엇이 되고 싶니?", blank: "want to be" },
+              { en: "I want to be a computer programmer.", ko: "나는 컴퓨터 프로그래머가 되고 싶어.", blank: "computer programmer" },
+              { en: "I’m good at designing computer programs.", ko: "나는 컴퓨터 프로그램을 설계하는 걸 잘해.", blank: "designing" },
+              { en: "I want to be a drone pilot.", ko: "나는 드론 조종사가 되고 싶어.", blank: "drone pilot" },
+              { en: "I’m good at flying drones.", ko: "나는 드론을 조종하는 걸 잘해.", blank: "flying drones" },
+              { en: "I want to be a movie director.", ko: "나는 영화감독이 되고 싶어.", blank: "movie director" },
+              { en: "I’m good at making videos.", ko: "나는 영상을 만드는 걸 잘해.", blank: "making videos" }
+            ]
+          },
+          {
+            id: "lesson-9",
+            title: "9. Who Painted the Picture?",
+            words: [
+              { en: "back", ko: "뒤, 뒷면" }, { en: "brave", ko: "용감한" }, { en: "finish", ko: "끝나다" },
+              { en: "hero", ko: "영웅" }, { en: "invent", ko: "발명하다" }, { en: "king", ko: "왕" },
+              { en: "letter", ko: "편지" }, { en: "map", ko: "지도" }, { en: "nature", ko: "자연" },
+              { en: "rabbit", ko: "토끼" }, { en: "say", ko: "말하다" }, { en: "ship", ko: "배" },
+              { en: "unbelievable", ko: "믿을 수 없는" }, { en: "war", ko: "전쟁" }
+            ],
+            sentences: [
+              { en: "Who painted the picture?", ko: "누가 그 그림을 그렸니?", blank: "painted" },
+              { en: "Van Gogh painted it.", ko: "반 고흐가 그렸어.", blank: "Van Gogh" },
+              { en: "Who built the ship?", ko: "누가 그 배를 만들었니?", blank: "built" },
+              { en: "Yi Sunsin built it.", ko: "이순신이 만들었어.", blank: "Yi Sunsin" },
+              { en: "Who invented the clock?", ko: "누가 그 시계를 발명했니?", blank: "invented" },
+              { en: "Jang Yeongsil invented it.", ko: "장영실이 발명했어.", blank: "Jang Yeongsil" },
+              { en: "Who wrote the story?", ko: "누가 그 이야기를 썼니?", blank: "wrote" },
+              { en: "Heo Gyun wrote it.", ko: "허균이 썼어.", blank: "Heo Gyun" },
+              { en: "Did you say Gaudi?", ko: "가우디라고 했니?", blank: "Gaudi" },
+              { en: "Did you say da Vinci?", ko: "다빈치라고 했니?", blank: "da Vinci" },
+              { en: "Did you say Sin Saimdang?", ko: "신사임당이라고 했니?", blank: "Sin Saimdang" }
+            ]
+          },
+          {
+            id: "lesson-10",
+            title: "10. What Season Do You Like?",
+            words: [
+              { en: "answer", ko: "대답하다" }, { en: "arrive", ko: "도착하다" }, { en: "autumn", ko: "가을" },
+              { en: "clear", ko: "맑은" }, { en: "coat", ko: "코트" }, { en: "full", ko: "가득 찬" },
+              { en: "land", ko: "땅, 나라" }, { en: "leaf", ko: "나뭇잎" }, { en: "memory", ko: "기억" },
+              { en: "queen", ko: "여왕" }, { en: "season", ko: "계절" }, { en: "smile", ko: "웃음, 미소" },
+              { en: "spring", ko: "봄" }
+            ],
+            sentences: [
+              { en: "What season do you like?", ko: "너는 어떤 계절을 좋아하니?", blank: "season" },
+              { en: "I like spring because I can see the beautiful flowers.", ko: "아름다운 꽃을 볼 수 있어서 봄을 좋아해.", blank: "because" },
+              { en: "I like summer because I can swim in the sea.", ko: "바다에서 수영할 수 있어서 여름을 좋아해.", blank: "swim in the sea" },
+              { en: "I like autumn because I can see the colorful leaves.", ko: "알록달록한 나뭇잎을 볼 수 있어서 가을을 좋아해.", blank: "colorful leaves" },
+              { en: "I like winter because I can go skiing.", ko: "스키를 타러 갈 수 있어서 겨울을 좋아해.", blank: "go skiing" },
+              { en: "Thanks for helping me.", ko: "도와줘서 고마워.", blank: "helping" }
+            ]
+          },
+          {
+            id: "lesson-11",
+            title: "11. I Think It Looks Bright",
+            words: [
+              { en: "board game", ko: "보드게임" }, { en: "boring", ko: "지루한" }, { en: "bright", ko: "밝은" },
+              { en: "cheap", ko: "(값이) 싼" }, { en: "clever", ko: "영리한, 똑똑한" }, { en: "dangerous", ko: "위험한" },
+              { en: "dark", ko: "어두운" }, { en: "quiet", ko: "조용한" }, { en: "skirt", ko: "치마" },
+              { en: "soft", ko: "부드러운" }
+            ],
+            sentences: [
+              { en: "This book looks interesting.", ko: "이 책은 재미있어 보여.", blank: "interesting" },
+              { en: "What do you think?", ko: "너는 어떻게 생각하니?", blank: "think" },
+              { en: "I think so, too.", ko: "나도 그렇게 생각해.", blank: "too" },
+              { en: "I don’t think so.", ko: "나는 그렇게 생각하지 않아.", blank: "don’t" },
+              { en: "I think it looks boring.", ko: "나는 그게 지루해 보인다고 생각해.", blank: "boring" },
+              { en: "This bread looks hard.", ko: "이 빵은 딱딱해 보여.", blank: "hard" },
+              { en: "I think it looks soft.", ko: "나는 그게 부드러워 보인다고 생각해.", blank: "soft" },
+              { en: "This sport looks safe.", ko: "이 운동은 안전해 보여.", blank: "safe" },
+              { en: "I think it looks dangerous.", ko: "나는 그게 위험해 보인다고 생각해.", blank: "dangerous" },
+              { en: "I think it looks bright.", ko: "나는 그게 밝아 보인다고 생각해.", blank: "bright" }
+            ]
+          },
+          {
+            id: "lesson-12",
+            title: "12. Do You Know Anything About Jige?",
+            words: [
+              { en: "afraid", ko: "두려워하는" }, { en: "bean", ko: "콩" }, { en: "call", ko: "부르다" },
+              { en: "carry", ko: "실어 나르다" }, { en: "culture", ko: "문화" }, { en: "holiday", ko: "휴가, 방학" },
+              { en: "Internet", ko: "인터넷" }, { en: "public", ko: "공공의" }, { en: "soup", ko: "수프" },
+              { en: "street", ko: "길" }, { en: "traditional", ko: "전통적인, 전통의" }
+            ],
+            sentences: [
+              { en: "Do you know anything about hanok?", ko: "한옥에 대해 아는 게 있니?", blank: "hanok" },
+              { en: "Yes, I do.", ko: "응, 알아.", blank: "do" },
+              { en: "It’s a traditional Korean house.", ko: "그것은 한국의 전통 가옥이야.", blank: "house" },
+              { en: "Do you know anything about pansori?", ko: "판소리에 대해 아는 게 있니?", blank: "pansori" },
+              { en: "It’s traditional Korean music.", ko: "그것은 한국의 전통 음악이야.", blank: "music" },
+              { en: "Do you know anything about jige?", ko: "지게에 대해 아는 게 있니?", blank: "jige" },
+              { en: "It’s a traditional Korean carrier.", ko: "그것은 짐을 나르는 한국의 전통 도구야.", blank: "carrier" },
+              { en: "I have no idea.", ko: "전혀 모르겠어.", blank: "no idea" }
+            ]
+          }
+        ];
+        const defaultLessons = [...firstSemesterLessons, ...secondSemesterLessons];
+
         const DRILL_NAMES = [
             '', '단어 듣고 보기', '단어 쓰기', '빈칸 채우기', '문장 순서 맞추기', '문장 쓰기'
         ];
-        const DATA_VERSION = "2026-06-23_v1.1.0";
+        const DATA_VERSION = "2026-11-16_v1.2.0";
 
         let state = {
             units: [], activeUnitId: null, activeDrillStep: 1, playList: [], playIndex: 0, score: 0, missed: [], skipped: [], drillAnswered: false,
@@ -613,13 +739,21 @@
 
         function loadAllData() {
             const data = localStorage.getItem('edudrill_lessons');
-            if (!data) {
-                state.units = JSON.parse(JSON.stringify(defaultLessons));
+            let savedUnits;
+            try { savedUnits = JSON.parse(data); }
+            catch { savedUnits = null; }
+
+            if (!Array.isArray(savedUnits)) {
+                state.units = structuredClone(defaultLessons);
                 saveAllData();
-                localStorage.setItem('edudrill_version', DATA_VERSION);
             } else {
-                try { state.units = JSON.parse(data); }
-                catch (e) { state.units = JSON.parse(JSON.stringify(defaultLessons)); saveAllData(); }
+                state.units = savedUnits;
+                if (localStorage.getItem('edudrill_version') !== DATA_VERSION) {
+                    const existingIds = new Set(savedUnits.map(unit => unit.id));
+                    const additions = secondSemesterLessons.filter(unit => !existingIds.has(unit.id));
+                    state.units.push(...structuredClone(additions));
+                    saveAllData();
+                }
             }
             renderHomeUnits();
             renderTeacherUnits();
@@ -631,9 +765,8 @@
         }
 
         function resetToSystemDefault() {
-            if (confirm("🚨 주의: 지금까지 로컬에서 수정한 모든 데이터가 삭제되고, 제공된 기본 1~6과 데이터로 초기화됩니다. 진행하시겠습니까?")) {
-                state.units = JSON.parse(JSON.stringify(defaultLessons));
-                localStorage.setItem('edudrill_version', DATA_VERSION);
+            if (confirm("이 브라우저에서 수정한 내용이 삭제되고 기본 Lesson 1~12로 돌아갑니다. 초기화할까요?")) {
+                state.units = structuredClone(defaultLessons);
                 saveAllData(); loadAllData();
                 showToast("기본 데이터로 전체 초기화되었습니다.");
             }
