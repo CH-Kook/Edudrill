@@ -85,21 +85,29 @@
             </section>
         </section>
 
-        <div id="quiz-setup-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
-            <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-xl space-y-5">
-                <div class="flex justify-between items-center border-b pb-3">
-                    <h3 class="font-extrabold text-slate-900 text-xl flex items-center gap-2"><i class="fa-solid fa-sliders text-orange-500"></i> 퀴즈 범위 설정하기</h3>
-                    <button onclick="closeSpeedQuizSetup()" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+        <dialog id="quiz-setup-modal" class="study-dialog" aria-labelledby="quiz-setup-title">
+            <div class="p-4 md:p-6 space-y-3">
+                <div class="flex justify-between items-center gap-2">
+                    <h2 id="quiz-setup-title" class="text-xl font-bold" tabindex="-1" autofocus>스피드 퀴즈 범위</h2>
+                    <button type="button" onclick="closeSpeedQuizSetup()" class="study-link px-2 text-sm" aria-label="닫기">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
                 </div>
-                <p class="text-sm text-slate-500">출제 영역에 포함할 단원을 <b>모두 체크</b>해 주세요. 여러 단원을 선택하면 문제가 골고루 섞여서 출제됩니다.</p>
-                <div id="quiz-unit-checkboxes" class="space-y-2 max-h-48 overflow-y-auto p-1"></div>
-                <div class="pt-2">
-                    <button onclick="startSpeedQuizGame()" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-2xl hover:from-amber-600 hover:to-orange-600 transition shadow-md shadow-orange-100 flex items-center justify-center gap-2 text-base"><i class="fa-solid fa-play"></i> 카운트다운 시작!</button>
+                <div class="study-tools">
+                    <button type="button" onclick="setQuizScope('all')" class="study-secondary">전체</button>
+                    <button type="button" onclick="setQuizScope('first')" class="study-secondary" aria-label="1학기 Lesson 1–6">1학기</button>
+                    <button type="button" onclick="setQuizScope('second')" class="study-secondary" aria-label="2학기 Lesson 7–12">2학기</button>
+                    <button type="button" onclick="setQuizScope('none')" class="study-secondary">선택 해제</button>
                 </div>
+                <div id="quiz-unit-checkboxes" role="group" aria-label="출제할 단원" class="relative space-y-2 max-h-56 overflow-y-auto p-1" onchange="updateQuizSelection()"></div>
+                <p id="quiz-selection-count" class="text-sm study-muted" aria-live="polite"></p>
+                <p id="quiz-setup-error" class="text-sm font-semibold text-rose-800 empty:hidden" role="status"></p>
+                <button type="button" onclick="startSpeedQuizGame()" class="study-primary w-full">퀴즈 시작</button>
             </div>
-        </div>
+        </dialog>
 
         <section id="view-quiz-play" class="view-section hidden max-w-2xl mx-auto space-y-4">
+            <h2 class="sr-only">스피드 퀴즈</h2>
             <div class="flex justify-between items-center bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-100">
                 <div class="flex items-center space-x-4">
                     <div class="text-center">
@@ -903,37 +911,69 @@
         function speakQuizText() { if (!quizState.currentItem) return; const raw = quizState.currentItem; speakText(raw.en || raw.sentenceEn || raw.blank || ""); }
 
         function openSpeedQuizSetup() {
-            if (state.units.length === 0) { showToast("학습할 단원 데이터가 전혀 없습니다."); return; }
+            const eligible = state.units.filter(unit => unit.words?.length || unit.sentences?.length);
+            if (eligible.length === 0) { showToast('퀴즈에 사용할 단어나 문장이 없어요.'); return; }
+            const previous = new Set(quizState.selectedUnitIds);
+            const hasPrevious = eligible.some(unit => previous.has(unit.id));
             const wrapper = document.getElementById('quiz-unit-checkboxes');
-            wrapper.innerHTML = '';
-            state.units.forEach((unit) => {
+            wrapper.replaceChildren();
+            eligible.forEach(unit => {
                 const totalItems = (unit.words?.length || 0) + (unit.sentences?.length || 0);
-                const div = document.createElement('label');
-                div.className = "flex items-center space-x-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition";
-                div.innerHTML = `
-                    <input type="checkbox" value="${escapeMarkup(unit.id)}" class="quiz-unit-cb rounded text-amber-500 focus:ring-amber-400 w-4 h-4" checked>
-                    <div class="text-sm font-bold text-slate-700 truncate flex-grow">${escapeMarkup(unitLabel(unit))}</div>
-                    <span class="text-xs bg-white border px-2 py-0.5 rounded text-slate-500 font-semibold shrink-0">문항 ${totalItems}개</span>`;
-                wrapper.appendChild(div);
+                const label = document.createElement('label');
+                label.className = 'flex items-center min-h-11 gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50';
+                label.innerHTML = '<input type="checkbox" class="quiz-unit-cb w-4 h-4 shrink-0"><span class="text-sm flex-1 [overflow-wrap:anywhere]"></span><span class="text-xs study-muted shrink-0"></span>';
+                const [checkbox, title, count] = label.children;
+                checkbox.value = unit.id;
+                checkbox.checked = !hasPrevious || previous.has(unit.id);
+                title.textContent = unitLabel(unit);
+                if (unitInfo(unit).number) title.lang = 'en';
+                count.textContent = `${totalItems}문항`;
+                count.setAttribute('aria-hidden', 'true');
+                wrapper.appendChild(label);
             });
-            document.getElementById('quiz-setup-modal').classList.remove('hidden');
+            updateQuizSelection();
+            document.getElementById('quiz-setup-modal').showModal();
         }
-        function closeSpeedQuizSetup() { document.getElementById('quiz-setup-modal').classList.add('hidden'); }
+        function closeSpeedQuizSetup() { document.getElementById('quiz-setup-modal').close(); }
+
+        function setQuizScope(scope) {
+            const semester = scope === 'first' ? firstSemesterLessons : secondSemesterLessons;
+            const ids = new Set(semester.map(unit => unit.id));
+            const wrapper = document.getElementById('quiz-unit-checkboxes');
+            wrapper.querySelectorAll('input').forEach(checkbox => {
+                checkbox.checked = scope === 'all' || (scope !== 'none' && ids.has(checkbox.value));
+            });
+            const firstChecked = wrapper.querySelector('input:checked');
+            wrapper.scrollTop = firstChecked ? firstChecked.closest('label').offsetTop : 0;
+            updateQuizSelection();
+        }
+
+        function updateQuizSelection() {
+            const count = document.querySelectorAll('.quiz-unit-cb:checked').length;
+            document.getElementById('quiz-selection-count').textContent = `${count}개 단원 선택`;
+            document.getElementById('quiz-setup-error').textContent = '';
+        }
 
         function startSpeedQuizGame() {
-            const checkboxes = document.querySelectorAll('.quiz-unit-cb');
-            quizState.selectedUnitIds = [];
-            checkboxes.forEach(cb => { if(cb.checked) quizState.selectedUnitIds.push(cb.value); });
-            if (quizState.selectedUnitIds.length === 0) { showToast("최소 한 개 이상의 단원을 범위로 선택해야 합니다!"); return; }
+            const selected = Array.from(document.querySelectorAll('.quiz-unit-cb:checked'), checkbox => checkbox.value);
+            const error = document.getElementById('quiz-setup-error');
+            if (selected.length === 0) {
+                error.textContent = '출제할 단원을 하나 이상 골라 주세요.';
+                return;
+            }
             quizState.pool = [];
             let totalWordsGlobal = [], totalSentencesGlobal = [];
             state.units.forEach(u => {
-                if (quizState.selectedUnitIds.includes(u.id)) {
+                if (selected.includes(u.id)) {
                     if(u.words) u.words.forEach(w => { quizState.pool.push({ ...w, type: 'word', parentTitle: u.title }); totalWordsGlobal.push(w); });
                     if(u.sentences) u.sentences.forEach(s => { quizState.pool.push({ ...s, type: 'sentence', parentTitle: u.title }); totalSentencesGlobal.push(s); });
                 }
             });
-            if (quizState.pool.length < 4) { showToast("💡 선택한 범위의 문항 수가 너무 적습니다 (최소 4개 항목 필요)."); return; }
+            if (quizState.pool.length < 4) {
+                error.textContent = '퀴즈를 시작하려면 단어와 문장이 합해서 4개 이상 필요해요.';
+                return;
+            }
+            quizState.selectedUnitIds = selected;
             quizState.globalWords = totalWordsGlobal.length > 0 ? totalWordsGlobal : [{en:"dummy", ko:"더미"}];
             quizState.globalSentences = totalSentencesGlobal.length > 0 ? totalSentencesGlobal : [{en:"dummy sentence", ko:"더미", blank:"dummy"}];
             quizState.score = 0; quizState.timeLeft = QUIZ_MAX_TIME; quizState.streak = 0;
