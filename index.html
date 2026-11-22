@@ -105,6 +105,10 @@
                 </div>
                 <div id="quiz-unit-checkboxes" role="group" aria-label="출제할 단원" class="relative space-y-2 max-h-56 overflow-y-auto p-1" onchange="updateQuizSelection()"></div>
                 <p id="quiz-selection-count" class="text-sm study-muted" aria-live="polite"></p>
+                <label class="flex items-center gap-2 min-h-11 text-sm">
+                    <input id="quiz-timed" type="checkbox" class="w-4 h-4">
+                    시간 제한 켜기
+                </label>
                 <p id="quiz-setup-error" class="text-sm font-semibold text-rose-800 empty:hidden" role="status"></p>
                 <button type="button" onclick="startSpeedQuizGame()" class="study-primary w-full">퀴즈 시작</button>
             </div>
@@ -123,7 +127,8 @@
                     </div>
                     <div id="quiz-multiplier-badge" class="hidden flex items-center bg-red-100 text-red-600 px-2.5 py-1 rounded-full text-xs font-black border border-red-300">⚡ 2X 점수!</div>
                 </div>
-                <div class="flex items-center space-x-3 w-1/2 justify-end">
+                <span id="quiz-practice-progress" class="text-sm study-muted"></span>
+                <div id="quiz-timer" class="flex items-center space-x-3 w-1/2 justify-end">
                     <i class="fa-solid fa-clock text-orange-500 text-xl animate-spin" style="animation-duration: 3s;"></i>
                     <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden border border-slate-200 relative">
                         <div id="quiz-timer-bar" class="bg-gradient-to-r from-orange-500 to-red-500 h-full transition-all duration-200" style="width: 100%"></div>
@@ -132,14 +137,10 @@
                 </div>
             </div>
             <div class="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-slate-100 min-h-[360px] flex flex-col justify-between relative overflow-hidden">
-                <div id="quiz-listening-watermark" class="absolute inset-0 bg-slate-50 flex flex-col items-center justify-center text-slate-300 hidden">
-                    <i class="fa-solid fa-volume-high text-7xl animate-bounce mb-3 text-indigo-200"></i>
-                    <p class="text-sm text-slate-400 font-bold">귀를 기울이고 원어민 소리를 들으세요!</p>
-                    <button onclick="speakQuizText()" class="mt-4 px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-200 transition"><i class="fa-solid fa-arrows-rotate"></i> 다시 듣기</button>
-                </div>
                 <div class="text-center space-y-4 my-auto relative z-10">
                     <div id="quiz-type-badge" class="inline-block px-3 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-500">유형 1: 의미 맞추기</div>
                     <h3 id="quiz-question-display" class="text-2xl md:text-3xl font-black text-slate-900 leading-relaxed tracking-wide px-2">Question Text</h3>
+                    <button type="button" id="quiz-listen" onclick="speakQuizText()" class="study-secondary hidden">다시 듣기</button>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6 relative z-10">
                     <button onclick="submitQuizAnswer(0)" id="quiz-choice-0" class="quiz-choice-btn p-4 bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-400 font-bold text-left rounded-2xl text-slate-700 transition flex items-center justify-between group active:scale-95"><span class="choice-text">Option 1</span> <i class="fa-regular fa-circle-right text-slate-300 group-hover:text-indigo-500 transition"></i></button>
@@ -149,14 +150,14 @@
                 </div>
             </div>
             <div class="text-center">
-                <button onclick="terminateSpeedQuiz()" class="text-xs text-rose-500 font-bold hover:underline"><i class="fa-solid fa-circle-stop"></i> 게임 기권하고 나가기</button>
+                <button type="button" onclick="endSpeedQuizGame()" class="study-secondary">퀴즈 끝내기</button>
             </div>
         </section>
 
         <section id="view-quiz-result" class="view-section hidden max-w-md mx-auto">
             <div class="bg-white rounded-3xl p-8 shadow-xl border border-slate-100 text-center space-y-6">
                 <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-indigo-50 text-indigo-600 text-5xl animate-bounce"><i class="fa-solid fa-stopwatch-20"></i></div>
-                <div><h2 class="text-2xl font-black text-slate-900">타임아웃! 게임 종료</h2><p class="text-sm text-slate-500 mt-1">서바이벌 퀴즈가 마무리되었습니다.</p></div>
+                <div><h2 class="text-2xl font-black text-slate-900">스피드 퀴즈 결과</h2><p id="quiz-result-count" class="text-sm study-muted mt-1"></p></div>
                 <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><div class="text-xs text-slate-400 font-bold uppercase tracking-wider">최종 획득 스코어</div><div id="quiz-final-score" class="text-5xl font-black text-orange-500 mt-1">0점</div></div>
                 <div class="flex flex-col space-y-2">
                     <button onclick="openSpeedQuizSetup()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-md">한 번 더 도전하기</button>
@@ -711,8 +712,9 @@
         };
 
         let quizState = {
-            selectedUnitIds: [], pool: [], currentItem: null, currentType: 1, correctAnswerString: "",
-            choices: [], timer: null, timeLeft: 20, score: 0, streak: 0, globalWords: [], globalSentences: []
+            selectedUnitIds: [], pool: [], groups: [], queue: [], lastGroup: null, currentItem: null,
+            choices: [], correctAnswerString: '', timed: false, timer: null, feedbackTimer: null, speechTimer: null,
+            timeLeft: 20, score: 0, streak: 0, answered: 0, correct: 0, acceptingAnswer: false
         };
 
         const QUIZ_MAX_TIME = 20;
@@ -789,7 +791,12 @@
             const target = document.getElementById(`view-${viewId}`);
             if (target) target.classList.remove('hidden');
             window.speechSynthesis?.cancel();
-            if (viewId !== 'quiz-play') clearInterval(quizState.timer);
+            if (viewId !== 'quiz-play') {
+                clearInterval(quizState.timer);
+                clearTimeout(quizState.feedbackTimer);
+                clearTimeout(quizState.speechTimer);
+                quizState.acceptingAnswer = false;
+            }
             if (viewId === 'home') renderHomeUnits();
             else if (viewId === 'teacher') { renderTeacherUnits(); if (state.activeUnitId) selectTeacherUnit(state.activeUnitId); }
             else if (viewId === 'drill-menu') { renderDrillMenu(); }
@@ -965,33 +972,36 @@
                 error.textContent = '출제할 단원을 하나 이상 골라 주세요.';
                 return;
             }
-            quizState.pool = [];
-            let totalWordsGlobal = [], totalSentencesGlobal = [];
-            state.units.forEach(u => {
-                if (selected.includes(u.id)) {
-                    if(u.words) u.words.forEach(w => { quizState.pool.push({ ...w, type: 'word', parentTitle: u.title }); totalWordsGlobal.push(w); });
-                    if(u.sentences) u.sentences.forEach(s => { quizState.pool.push({ ...s, type: 'sentence', parentTitle: u.title }); totalSentencesGlobal.push(s); });
-                }
-            });
-            if (quizState.pool.length < 4) {
-                error.textContent = '퀴즈를 시작하려면 단어와 문장이 합해서 4개 이상 필요해요.';
+            const pool = state.units.filter(unit => selected.includes(unit.id)).flatMap(unit => [
+                ...(unit.words || []).map(item => ({ ...item, type: 'word', parentTitle: unit.title })),
+                ...(unit.sentences || []).map(item => ({ ...item, type: 'sentence', parentTitle: unit.title }))
+            ]);
+            const groups = buildQuizGroups(pool);
+            if (groups.length < 2) {
+                error.textContent = '퀴즈를 시작하려면 서로 다른 단어나 문장이 2개 이상 필요해요.';
                 return;
             }
-            quizState.selectedUnitIds = selected;
-            quizState.globalWords = totalWordsGlobal.length > 0 ? totalWordsGlobal : [{en:"dummy", ko:"더미"}];
-            quizState.globalSentences = totalSentencesGlobal.length > 0 ? totalSentencesGlobal : [{en:"dummy sentence", ko:"더미", blank:"dummy"}];
-            quizState.score = 0; quizState.timeLeft = QUIZ_MAX_TIME; quizState.streak = 0;
+            Object.assign(quizState, {
+                selectedUnitIds: selected, pool, groups, queue: [], lastGroup: null,
+                timed: document.getElementById('quiz-timed').checked,
+                score: 0, streak: 0, answered: 0, correct: 0, timeLeft: QUIZ_MAX_TIME
+            });
+
             document.getElementById('quiz-score-text').innerText = "0";
             document.getElementById('quiz-streak-badge').classList.add('hidden');
             document.getElementById('quiz-multiplier-badge').classList.add('hidden');
             closeSpeedQuizSetup(); navigate('quiz-play');
-            clearInterval(quizState.timer);
-            quizState.timer = setInterval(() => {
-                quizState.timeLeft -= 1;
-                if (quizState.timeLeft <= 0) { quizState.timeLeft = 0; endSpeedQuizGame(); }
+            document.getElementById('quiz-timer').classList.toggle('hidden', !quizState.timed);
+            document.getElementById('quiz-practice-progress').classList.toggle('hidden', quizState.timed);
+            if (quizState.timed) {
+                quizState.timer = setInterval(() => {
+                    quizState.timeLeft--;
+                    updateQuizTimerUI();
+                    if (quizState.timeLeft <= 0) endSpeedQuizGame();
+                }, 1000);
                 updateQuizTimerUI();
-            }, 1000);
-            updateQuizTimerUI(); nextQuizQuestion();
+            }
+            nextQuizQuestion();
         }
 
         function updateQuizTimerUI() {
@@ -1005,72 +1015,130 @@
             else { bar.className = "bg-gradient-to-r from-orange-500 to-red-500 h-full"; }
         }
 
+        function shuffleQuiz(items) {
+            const shuffled = [...items];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function quizBlanks(item) {
+            if (item.type !== 'sentence') return [];
+            const blanks = new Map();
+            const addBlank = (index, answer) => {
+                const prompt = item.en.slice(0, index) + '_____' + item.en.slice(index + answer.length);
+                blanks.set(prompt, { prompt, answer });
+            };
+            if (item.blank?.trim()) {
+                const escaped = item.blank.trim().replace(/[.*+?^$\x7B\x7D()|[\]\\]/g, '\\$&');
+                const match = item.en.match(new RegExp('(?<![A-Za-z])' + escaped + '(?![A-Za-z])', 'i'));
+                if (match) addBlank(match.index, match[0]);
+            }
+            for (const match of item.en.matchAll(/\b[A-Za-z]+(?:['’][A-Za-z]+)?\b/g)) {
+                if (match[0].length >= 4) addBlank(match.index, match[0]);
+            }
+            return [...blanks.values()];
+        }
+
+        function buildQuizGroups(pool) {
+            const groups = new Map();
+            const entries = pool.map(item => ({
+                item, english: cleanText(item.en), korean: cleanText(item.ko), blanks: quizBlanks(item)
+            }));
+            const blankAnswers = entries.flatMap(entry => entry.blanks.map(blank => blank.answer));
+            for (const { item, english, korean, blanks } of entries) {
+                if (!english || !korean) continue;
+                const alternatives = entries.filter(entry => entry.english !== english && entry.korean !== korean);
+                const addQuestion = (type, prompt, answer, preferred, fallback = []) => {
+                    const seen = new Set([cleanText(answer)]);
+                    const options = [];
+                    const collect = candidates => {
+                        for (const candidate of candidates) {
+                            const key = cleanText(candidate);
+                            if (!key || seen.has(key)) continue;
+                            seen.add(key);
+                            options.push(candidate);
+                        }
+                    };
+                    collect(preferred);
+                    if (options.length < 3) collect(fallback);
+                    if (!options.length) return;
+                    if (!groups.has(english)) groups.set(english, new Map());
+                    const key = JSON.stringify([type, cleanText(prompt), cleanText(answer)]);
+                    groups.get(english).set(key, { item, type, prompt, answer, options });
+                };
+                const peers = alternatives.filter(entry => entry.item.type === item.type);
+                addQuestion(1, item.en, item.ko, peers.map(entry => entry.item.ko), alternatives.map(entry => entry.item.ko));
+                addQuestion(2, item.ko, item.en, peers.map(entry => entry.item.en), alternatives.map(entry => entry.item.en));
+                addQuestion(4, '듣고 알맞은 영어를 고르세요.', item.en, peers.map(entry => entry.item.en), alternatives.map(entry => entry.item.en));
+                for (const { prompt, answer } of blanks) {
+                    const distractors = blankAnswers.filter(word => word.includes(' ') === answer.includes(' '));
+                    const words = alternatives.filter(entry => entry.item.type === 'word').map(entry => entry.item.en);
+                    addQuestion(3, prompt, answer, distractors, words);
+                }
+            }
+            return [...groups.values()].map(variants => ({ variants: shuffleQuiz([...variants.values()]), cursor: 0 }));
+        }
+
         function nextQuizQuestion() {
-            const item = quizState.pool[Math.floor(Math.random() * quizState.pool.length)];
+            if (quizState.queue.length === 0) {
+                quizState.queue = shuffleQuiz(quizState.groups);
+                if (quizState.queue[0] === quizState.lastGroup) {
+                    quizState.queue.push(quizState.queue.shift());
+                }
+            }
+            const group = quizState.queue.shift();
+            const { item, type, prompt, answer, options } = group.variants[group.cursor];
+            group.cursor = (group.cursor + 1) % group.variants.length;
+            quizState.lastGroup = group;
             quizState.currentItem = item;
-            let allowedTypes = [1, 2, 4];
-            if (item.type === 'sentence') { allowedTypes.push(3); }
-            quizState.currentType = allowedTypes[Math.floor(Math.random() * allowedTypes.length)];
-            document.getElementById('quiz-listening-watermark').classList.add('hidden');
+            quizState.correctAnswerString = answer;
+            quizState.choices = shuffleQuiz([answer, ...shuffleQuiz(options).slice(0, 3)]);
+            quizState.acceptingAnswer = true;
+
             const badge = document.getElementById('quiz-type-badge');
-            const questionDisplay = document.getElementById('quiz-question-display');
-            let correctAnswer = "", wrongPool = [];
-            if (quizState.currentType === 1) {
-                badge.className = "inline-block px-3 py-1 bg-indigo-100 rounded-full text-xs font-bold text-indigo-700";
-                badge.innerText = "유형 1: 올바른 우리말 뜻 맞추기";
-                questionDisplay.innerText = item.en; correctAnswer = item.ko;
-                wrongPool = item.type === 'word' ? quizState.globalWords.map(w => w.ko) : quizState.globalSentences.map(s => s.ko);
-            } else if (quizState.currentType === 2) {
-                badge.className = "inline-block px-3 py-1 bg-amber-100 rounded-full text-xs font-bold text-amber-700";
-                badge.innerText = "유형 2: 알맞은 영어 표현 고르기";
-                questionDisplay.innerText = item.ko; correctAnswer = item.en;
-                wrongPool = item.type === 'word' ? quizState.globalWords.map(w => w.en) : quizState.globalSentences.map(s => s.en);
-            } else if (quizState.currentType === 3) {
-                badge.className = "inline-block px-3 py-1 bg-emerald-100 rounded-full text-xs font-bold text-emerald-700";
-                badge.innerText = "유형 3: 문장 빈칸 단어 추론하기";
-                const safeRegex = new RegExp(item.blank.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
-                const masked = item.en.replace(safeRegex, "_______");
-                questionDisplay.innerHTML = `<div class="text-sm text-slate-400 mb-1">뜻: ${escapeMarkup(item.ko)}</div> <div>${escapeMarkup(masked)}</div>`;
-                correctAnswer = item.blank;
-                wrongPool = quizState.globalWords.map(w => w.en).concat(quizState.globalSentences.map(s => s.blank || ""));
-            } else if (quizState.currentType === 4) {
-                badge.className = "inline-block px-3 py-1 bg-pink-100 rounded-full text-xs font-bold text-pink-700";
-                badge.innerText = "유형 4: 🎧 리스닝 청해 평가";
-                document.getElementById('quiz-listening-watermark').classList.remove('hidden');
-                questionDisplay.innerText = "소리를 듣고 정답을 찾으세요!";
-                correctAnswer = item.en;
-                wrongPool = item.type === 'word' ? quizState.globalWords.map(w => w.en) : quizState.globalSentences.map(s => s.en);
+            badge.textContent = ['', '우리말 뜻 고르기', '영어 표현 고르기', '빈칸 채우기', '듣고 고르기'][type];
+            const display = document.getElementById('quiz-question-display');
+            display.textContent = prompt;
+            display.lang = type === 1 || type === 3 ? 'en' : 'ko';
+            if (type === 3) {
+                const hint = document.createElement('span');
+                hint.className = 'block text-sm study-muted mb-2';
+                hint.lang = 'ko';
+                hint.textContent = item.ko;
+                display.prepend(hint);
             }
-            quizState.correctAnswerString = correctAnswer;
-            wrongPool = [...new Set(wrongPool)].filter(ans => ans !== correctAnswer && ans !== "");
-            wrongPool.sort(() => Math.random() - 0.5);
-            let finalChoices = [correctAnswer];
-            for (let i = 0; i < 3; i++) {
-                if (wrongPool[i]) finalChoices.push(wrongPool[i]);
-                else finalChoices.push(i === 0 ? "first" : (i === 1 ? "second" : "third"));
-            }
-            finalChoices.sort(() => Math.random() - 0.5);
-            quizState.choices = finalChoices;
-            for (let i = 0; i < 4; i++) {
-                const btn = document.getElementById(`quiz-choice-${i}`);
-                btn.querySelector('.choice-text').innerText = finalChoices[i];
-                btn.className = "quiz-choice-btn p-4 bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-400 font-bold text-left rounded-2xl text-slate-700 transition flex items-center justify-between group active:scale-95";
-                btn.style.pointerEvents = 'auto';
-            }
-            if (quizState.currentType === 4) { setTimeout(speakQuizText, 250); }
+            document.getElementById('quiz-listen').classList.toggle('hidden', type !== 4);
+            document.getElementById('quiz-practice-progress').textContent = (quizState.answered + 1) + '번째 문제';
+
+            document.querySelectorAll('.quiz-choice-btn').forEach((button, i) => {
+                button.className = 'quiz-choice-btn p-4 bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-400 font-bold text-left rounded-2xl text-slate-700 transition flex items-center justify-between gap-2';
+                button.classList.toggle('hidden', i >= quizState.choices.length);
+                button.disabled = i >= quizState.choices.length;
+                const label = button.querySelector('.choice-text');
+                label.textContent = quizState.choices[i] || '';
+                label.lang = type === 1 ? 'ko' : 'en';
+            });
+            if (type === 4) quizState.speechTimer = setTimeout(speakQuizText, 250);
         }
 
         function submitQuizAnswer(chosenIdx) {
+            if (!quizState.acceptingAnswer || !quizState.choices[chosenIdx]) return;
+            quizState.acceptingAnswer = false;
+            quizState.answered++;
+            clearTimeout(quizState.speechTimer);
             const chosenString = quizState.choices[chosenIdx];
             const btn = document.getElementById(`quiz-choice-${chosenIdx}`);
-            document.querySelectorAll('.quiz-choice-btn').forEach(b => b.style.pointerEvents = 'none');
+            document.querySelectorAll('.quiz-choice-btn').forEach(button => { button.disabled = true; });
             if (chosenString === quizState.correctAnswerString) {
-                quizState.streak = (quizState.streak || 0) + 1;
+                quizState.correct++;
+                quizState.streak++;
                 const hasMultiplier = quizState.streak >= 5;
                 const pointsGained = 10 * (hasMultiplier ? 2 : 1);
                 quizState.score += pointsGained;
-                quizState.timeLeft += 2;
-                if (quizState.timeLeft > QUIZ_MAX_TIME) { quizState.timeLeft = QUIZ_MAX_TIME; }
+                if (quizState.timed) quizState.timeLeft = Math.min(quizState.timeLeft + 2, QUIZ_MAX_TIME);
                 document.getElementById('quiz-score-text').innerText = quizState.score;
                 const streakBadge = document.getElementById('quiz-streak-badge');
                 const streakTxt = document.getElementById('quiz-streak-text');
@@ -1078,23 +1146,28 @@
                 streakBadge.classList.remove('hidden');
                 streakTxt.innerText = `${quizState.streak} 콤보`;
                 if (hasMultiplier) { multBadge.classList.remove('hidden'); showToast(`🔥 ${quizState.streak}콤보 달성! 2배 점수 획득 (+${pointsGained}점)`); }
-                else { multBadge.classList.add('hidden'); showToast("정답! 시간 +2초 ⏱️"); }
+                else { multBadge.classList.add('hidden'); showToast(quizState.timed ? '정답! 시간 +2초' : '정답이에요.'); }
                 btn.className = "quiz-choice-btn p-4 bg-emerald-500 border-2 border-emerald-600 font-bold text-left rounded-2xl text-white transition flex items-center justify-between";
             } else {
                 quizState.streak = 0;
                 document.getElementById('quiz-streak-badge').classList.add('hidden');
                 document.getElementById('quiz-multiplier-badge').classList.add('hidden');
-                quizState.timeLeft -= 5;
-                if (quizState.timeLeft < 0) quizState.timeLeft = 0;
-                showToast("❌ 오답! 콤보 리셋! 시간 -5초");
+                if (quizState.timed) quizState.timeLeft = Math.max(quizState.timeLeft - 5, 0);
+                showToast('정답: ' + quizState.correctAnswerString + (quizState.timed ? ' · 시간 -5초' : ''));
                 btn.className = "quiz-choice-btn p-4 bg-rose-500 border-2 border-rose-600 font-bold text-left rounded-2xl text-white transition flex items-center justify-between";
             }
-            updateQuizTimerUI();
-            setTimeout(() => { if (quizState.timeLeft <= 0) { endSpeedQuizGame(); } else { nextQuizQuestion(); } }, 400);
+            if (quizState.timed) updateQuizTimerUI();
+            quizState.feedbackTimer = setTimeout(() => {
+                if (quizState.timed && quizState.timeLeft <= 0) endSpeedQuizGame();
+                else nextQuizQuestion();
+            }, 400);
         }
 
-        function terminateSpeedQuiz() { if (confirm("현재 진행 중인 퀴즈를 중단하고 나가시겠습니까?")) { endSpeedQuizGame(); } }
-        function endSpeedQuizGame() { clearInterval(quizState.timer); navigate('quiz-result'); document.getElementById('quiz-final-score').innerText = `${quizState.score} 점`; }
+        function endSpeedQuizGame() {
+            navigate('quiz-result');
+            document.getElementById('quiz-result-count').textContent = quizState.answered + '문제 중 ' + quizState.correct + '문제 정답';
+            document.getElementById('quiz-final-score').textContent = quizState.score + '점';
+        }
 
         // ================= 🧭 길찾기(DIRECTIONS) 미니게임 엔진 =================
         const directionDeck = {
